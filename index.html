@@ -98,7 +98,8 @@ const firebaseConfig = {
         let isManagerModeActive = false;
         let currentViewingDateMgr;
         let allShiftsData = {}; // Re-introduced for client-side caching
-
+        let currentPastShiftViewDate;
+        
         // DOM Elements (Copied from your provided index.html)
         const initialLoginViewWrapper = document.getElementById('initialLoginViewWrapper');
         const loginUserSelect = document.getElementById('loginUserSelect');
@@ -162,18 +163,19 @@ const firebaseConfig = {
         
         // --- Initialization ---
         async function initializeApp() {
-            try {
-                await loadMasterPassword();
-                currentViewingDateMgr = getNextWeekStartDate();
-                await initializeCoworkers(); 
-                console.log("initializeApp: Coworkers loaded, length:", coworkers.length);
-                populateLoginUserDropdown(); 
-                checkActiveSession();
-            } catch (error) {
-                console.error("Error during app initialization:", error);
-                initialLoginError.textContent = "Failed to initialize. Check console for details.";
-            }
-        }
+    try {
+        await loadMasterPassword();
+        currentViewingDateMgr = getNextWeekStartDate(); // For manager view
+        currentPastShiftViewDate = getMondayOfDate(new Date()); // Initialize for user's past shifts view
+        await initializeCoworkers(); 
+        console.log("initializeApp: Coworkers loaded, length:", coworkers.length);
+        populateLoginUserDropdown(); 
+        checkActiveSession();
+    } catch (error) {
+        console.error("Error during app initialization:", error);
+        initialLoginError.textContent = "Failed to initialize. Check console for details.";
+    }
+    }
 
         async function loadMasterPassword() {
             try {
@@ -268,26 +270,45 @@ const firebaseConfig = {
         function logout() { loggedInCoworker = null; isManagerModeActive = false; localStorage.removeItem(ACTIVE_SESSION_USER_KEY); loginPasswordInput.value = ""; masterManagerPasswordInput.value = ""; initialLoginError.textContent = ""; managerUnlockError.textContent = ""; changeMasterPasswordSection.classList.add('hidden'); showCorrectView(); }
 
         async function prepareUserView() {
-            if (!loggedInCoworker) return;
-            welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
-            accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
-            try {
-                const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get();
-                if (!querySnapshot.empty) {
-                    const latestPublishedWeekKey = querySnapshot.docs[0].id;
-                    const latestPublishedWeekData = await getWeekData(new Date(latestPublishedWeekKey)); // Use getWeekData to leverage cache
-                    latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
-                    renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
-                    latestPublishedScheduleSection.classList.remove('hidden');
-                } else {
-                    latestPublishedScheduleSection.classList.add('hidden');
-                }
-                const applicationWeekStartDate = getNextWeekStartDate();
-                userWeekDisplay.textContent = `Application Week: ${formatDate(applicationWeekStartDate, false)}`;
-                const shiftsToDisplayForApplication = await getShiftsForWeek(applicationWeekStartDate);
-                renderUserShifts(shiftsToDisplayForApplication, applicationWeekStartDate);
-            } catch (error) { console.error("Error preparing user view:", error); userWeekDisplay.textContent = "Error loading shifts."; }
+    if (!loggedInCoworker) return;
+    welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
+    accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
+
+    // Show and render "My Past Shifts" section
+    if (myPastShiftsSection) { // Check if the element exists
+        myPastShiftsSection.classList.remove('hidden');
+        // Optionally reset currentPastShiftViewDate to current date's week/month each time user view is prepared
+        // currentPastShiftViewDate = getMondayOfDate(new Date()); 
+        await renderMyPastShifts(); // Call the rendering function
+    } else {
+        console.error("myPastShiftsSection element not found!");
+    }
+
+    try {
+        // Display latest published schedule (existing logic)
+        const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get();
+        if (!querySnapshot.empty) {
+            const latestPublishedWeekKey = querySnapshot.docs[0].id;
+            // Use getWeekData to leverage cache if data for this week was already fetched
+            const latestPublishedWeekData = await getWeekData(new Date(latestPublishedWeekKey)); 
+            latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
+            renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
+            latestPublishedScheduleSection.classList.remove('hidden');
+        } else {
+            latestPublishedScheduleSection.classList.add('hidden');
         }
+        
+        // Display application week (existing logic)
+        const applicationWeekStartDate = getNextWeekStartDate();
+        userWeekDisplay.textContent = `Application Week: ${formatDate(applicationWeekStartDate, false)}`;
+        const shiftsToDisplayForApplication = await getShiftsForWeek(applicationWeekStartDate);
+        renderUserShifts(shiftsToDisplayForApplication, applicationWeekStartDate);
+    } catch (error) { 
+        console.error("Error preparing user view (published/application schedule):", error); 
+        // Keep userWeekDisplay error specific if needed, or have a general error display area
+        if(userWeekDisplay) userWeekDisplay.textContent = "Error loading application shifts."; 
+    }
+    }
 
         // --- Rendering Logic ---
         function renderUserShifts(shiftsForWeek, forWeekDate) { userShiftsTableBody.innerHTML = ""; shiftsForWeek.forEach(shift => { const row = userShiftsTableBody.insertRow(); row.insertCell().textContent = shift.day; row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.time; const statusCell = row.insertCell(); const applicantsAssignedCell = row.insertCell(); const actionCell = row.insertCell(); const isMyAppPending = shift.status === 'pending' && shift.applicants.includes(loggedInCoworker.name); const isApproved = shift.status === 'approved'; if (isApproved) { statusCell.textContent = "Approved"; statusCell.className = 'status-approved'; applicantsAssignedCell.textContent = shift.applicantName; actionCell.textContent = "---"; } else if (isMyAppPending) { statusCell.textContent = "Pending"; statusCell.className = 'status-pending'; applicantsAssignedCell.textContent = loggedInCoworker.name; const cancelBtn = document.createElement('button'); cancelBtn.textContent = "Cancel App"; cancelBtn.classList.add("deny"); cancelBtn.onclick = () => cancelApplication(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(cancelBtn); } else { statusCell.textContent = "Available"; statusCell.className = 'status-available'; applicantsAssignedCell.textContent = "---"; const applyButton = document.createElement('button'); applyButton.textContent = "Apply"; applyButton.classList.add("apply"); applyButton.onclick = () => applyForShift(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(applyButton); } }); }
