@@ -69,18 +69,17 @@
     <!-- <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> -->
 
     <script>
-        // Your Firebase project configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkJwykLgHJknOjhsplI_BC77DZJ1wc3Sc",
-            authDomain: "makersplayce-shift-planner.firebaseapp.com",
-            databaseURL: "https://makersplayce-shift-planner-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "makersplayce-shift-planner",
-            storageBucket: "makersplayce-shift-planner.firebasestorage.app",
-            messagingSenderId: "484080846181",
-            appId: "1:484080846181:web:3120dd6711d51a6e8f4d8c",
-            measurementId: "G-171W3Y9YQB"
-        };
-
+       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDkJwykLgHJknOjhsplI_BC77DZJ1wc3Sc",
+  authDomain: "makersplayce-shift-planner.firebaseapp.com",
+  databaseURL: "https://makersplayce-shift-planner-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "makersplayce-shift-planner",
+  storageBucket: "makersplayce-shift-planner.firebasestorage.app",
+  messagingSenderId: "484080846181",
+  appId: "1:484080846181:web:3120dd6711d51a6e8f4d8c",
+  measurementId: "G-171W3Y9YQB"
+};
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
