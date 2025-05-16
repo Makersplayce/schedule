@@ -160,12 +160,17 @@
         function getWeekKey(dateObj) { return getMondayOfDate(dateObj).toISOString().split('T')[0]; }
         
         // --- Initialization ---
-        async function initializeApp() {
+                async function initializeApp() {
             try {
                 await loadMasterPassword();
                 currentViewingDateMgr = getNextWeekStartDate();
-                await initializeCoworkers();
-                populateLoginUserDropdown();
+                await initializeCoworkers(); 
+                
+                // ADD THIS LOGGING:
+                console.log("Content of global 'coworkers' array right before populating dropdown:", JSON.stringify(coworkers));
+                console.log("Length of global 'coworkers' array:", coworkers.length);
+
+                populateLoginUserDropdown(); 
                 checkActiveSession();
             } catch (error) {
                 console.error("Error during app initialization:", error);
