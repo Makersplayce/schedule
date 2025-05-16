@@ -43,6 +43,7 @@
         .hidden { display: none !important; }
         #scheduleOverviewTable td, .manager-schedule-preview-table td, #latestPublishedScheduleTable td {text-align: center;}
         #totalHoursSummaryTable td, #totalHoursSummaryTable th { text-align: left; font-size: 0.9em; }
+        #myPastShiftsTable td, #myPastShiftsTable th { text-align: left; font-size: 0.9em; } /* Added for consistency */
         .coworker-management-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
         .coworker-management-item:last-child { border-bottom: none; } .coworker-management-item span { flex-grow: 1; }
         .error-message { color: red; text-align: center; margin-top: 10px; }
@@ -53,12 +54,51 @@
         .published-status-indicator { font-size: 0.8em; font-style: italic; margin-top: 3px; text-align: center; }
         #totalHoursSummarySection { margin-top: 30px; padding-top: 20px; border-top: 2px solid #007bff;}
         #totalHoursSummarySection .input-group select {width: 250px; display: inline-block;}
+        #myPastShiftsSection { margin-top: 20px; } /* Added some margin for past shifts section */
     </style>
 </head>
 <body>
     <div class="app-shell">
         <div id="initialLoginViewWrapper" class="main-content-area"><div class="app-container"><div id="initialLoginView" class="container view-section"><h1>Shift Scheduler Login</h1><div class="input-group"><label for="loginUserSelect">Select Your Name:</label><select id="loginUserSelect"><option value="">-- Select Name --</option></select></div><div class="input-group"><label for="loginPassword">Password:</label><input type="password" id="loginPassword"></div><button id="coworkerLoginBtn">Login</button><p id="initialLoginError" class="error-message"></p></div></div></div>
-        <div id="userShiftViewWrapper" class="main-content-area hidden"><div class="app-container"><div id="latestPublishedScheduleSection" class="container hidden"><h2 id="latestPublishedScheduleTitle">Latest Published Schedule</h2><table id="latestPublishedScheduleTable"><thead><tr><th>Day</th><th>9:30 - 13:00</th><th>13:00 - 16:30</th></tr></thead><tbody></tbody></table></div><div id="userShiftView" class="container view-section"><div class="top-bar"><h2 id="welcomeUserName">Welcome, [User]!</h2><div><button id="accessManagerPanelBtn" class="secondary hidden">Manager Panel</button><button id="userLogoutBtn" class="secondary">Logout</button></div></div><p style="text-align:center;" id="userWeekDisplay">Application Week: </p><h3>Available Shifts & Your Applications</h3><table id="userShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time</th><th>Status</th><th>Your Status / Assigned</th><th>Action</th></tr></thead><tbody></tbody></table></div></div></div>
+        
+        <div id="userShiftViewWrapper" class="main-content-area hidden">
+            <div class="app-container">
+                <div id="latestPublishedScheduleSection" class="container hidden">
+                    <h2 id="latestPublishedScheduleTitle">Latest Published Schedule</h2>
+                    <table id="latestPublishedScheduleTable"><thead><tr><th>Day</th><th>9:30 - 13:00</th><th>13:00 - 16:30</th></tr></thead><tbody></tbody></table>
+                </div>
+                <div id="userShiftView" class="container view-section">
+                    <div class="top-bar"><h2 id="welcomeUserName">Welcome, [User]!</h2><div><button id="accessManagerPanelBtn" class="secondary hidden">Manager Panel</button><button id="userLogoutBtn" class="secondary">Logout</button></div></div>
+                    <p style="text-align:center;" id="userWeekDisplay">Application Week: </p>
+                    <h3>Available Shifts & Your Applications</h3>
+                    <table id="userShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time</th><th>Status</th><th>Your Status / Assigned</th><th>Action</th></tr></thead><tbody></tbody></table>
+                </div>
+                <!-- Moved My Past Shifts Section here, within userShiftViewWrapper but separate container -->
+                <div id="myPastShiftsSection" class="container view-section hidden"> 
+                    <h3>My Past Shifts History</h3>
+                    <div class="week-navigation">
+                        <button id="prevPastPeriodBtn" class="small-action">« Previous</button>
+                        <select id="pastShiftsViewTypeSelect" style="padding:5px; font-size:0.9em; margin: 0 10px;">
+                            <option value="weekly">View by Week</option>
+                            <option value="monthly">View by Month</option>
+                        </select>
+                        <button id="nextPastPeriodBtn" class="small-action">Next »</button>
+                    </div>
+                    <p style="text-align:center; font-size:0.9em;" id="myPastShiftsPeriodDisplay"></p>
+                    <table id="myPastShiftsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="managerDashboardView" class="manager-dashboard hidden"><div class="manager-top-bar"><h1>Manager Dashboard</h1><div><span id="managerLoggedInAs" style="margin-right:20px;"></span><button id="switchToUserViewBtn" class="secondary small-action">My Shifts View</button><button id="managerDashboardLogoutBtn" class="secondary small-action">Logout</button></div></div><div class="manager-body"><div class="manager-sidebar"><h4>Week Navigation</h4><div class="week-navigation"><button id="prevWeekBtnMgr" class="small-action">« Prev Wk</button><button id="jumpToTargetWeekBtnMgr" class="small-action">Next Wk</button><button id="nextWeekBtnMgr" class="small-action">Further Wk »</button></div><p style="text-align:center; font-size:0.9em; margin-bottom:5px;" id="managerSidebarWeekDisplay"></p><hr><h4>Week Actions</h4><button id="publishWeekBtn" class="publish small-action" style="width:100%; margin-bottom:5px;">Publish Week</button><div id="publishStatusIndicator" class="published-status-indicator">Status: Not Published</div><hr><h4>Admin Settings</h4><button id="showChangeMasterPassBtn" class="secondary small-action" style="width:100%; margin-bottom:10px;">Change Master Password</button><button id="resetAllDataBtn" class="delete small-action" style="width:100%;">Reset All Data</button></div><div class="manager-main-content"><div id="changeMasterPasswordSection" class="container hidden" style="border: 1px solid #ffc107; background: #fff9e6;"><h3>Change Master Admin Password</h3><div class="input-group"><label for="currentMasterPassword">Current Master Password:</label><input type="password" id="currentMasterPassword"></div><div class="input-group"><label for="newMasterPassword">New Master Password:</label><input type="password" id="newMasterPassword"></div><div class="input-group"><label for="confirmNewMasterPassword">Confirm New Password:</label><input type="password" id="confirmNewMasterPassword"></div><button id="submitChangeMasterPassBtn">Change Password</button><button id="cancelChangeMasterPassBtn" class="secondary">Cancel</button><p id="changeMasterPassError" class="error-message"></p><p id="changeMasterPassSuccess" class="success-message"></p></div><div class="manager-schedule-preview"><h3 id="managerSchedulePreviewTitle">Shift Schedule Preview: Week of [Date]</h3><table id="managerSchedulePreviewTable"><thead><tr><th>Day</th><th>9:30 - 13:00</th><th>13:00 - 16:30</th></tr></thead><tbody></tbody></table></div><div class="manager-main-flex-row"><div class="manager-applications-column"><h3>Shift Applications Management</h3><p style="text-align:center; font-size:0.9em;" id="managerApplicationWeekDisplay"></p><table id="managerShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time</th><th>Status</th><th>Applicants / Assigned</th><th>Actions</th></tr></thead><tbody></tbody></table></div><div class="manager-hours-column"><h3>Hours Overview</h3><div class="input-group" style="margin-bottom:5px;"><select id="hoursViewTypeSelect"><option value="weekly">Weekly Hours</option><option value="monthly">Monthly Hours</option></select></div><div id="hoursOverviewList"></div></div></div><h3>Manage Coworkers</h3><div class="input-group"><label for="newCoworkerName">Add Name:</label><input type="text" id="newCoworkerName" placeholder="Coworker's name"><label for="newCoworkerPassword" style="margin-top:5px;">Set Password:</label><input type="password" id="newCoworkerPassword" placeholder="Initial password"><label style="margin-top:5px;"><input type="checkbox" id="newCoworkerIsManager"> Is Manager?</label><button id="addCoworkerBtn" style="margin-top:10px;">Add Coworker</button></div><div id="coworkerList"></div><div id="totalHoursSummarySection" class="container"><h3>Total Hours Summary per Coworker</h3><div class="input-group"><label for="totalHoursPeriodSelect" style="display:inline-block; margin-right:10px;">Select Period:</label><select id="totalHoursPeriodSelect"><option value="viewing_week">Currently Viewed Week</option><option value="viewing_month">Currently Viewed Month</option><option value="all_loaded">All Loaded Data</option></select></div><table id="totalHoursSummaryTable"><thead><tr><th>Coworker</th><th>Total Approved Hours</th></tr></thead><tbody></tbody></table></div></div></div></div>
         <div id="managerUnlockModal" class="hidden" style="position:fixed; top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><div style="background:white; padding:30px; border-radius:8px; box-shadow: 0 0 15px rgba(0,0,0,0.3); text-align:center;"><h3>Manager Panel Access</h3><p>Enter Master Admin Password:</p><input type="password" id="masterManagerPasswordInput" style="padding:10px; margin-bottom:15px; width:200px;"><br><button id="unlockManagerPanelBtn">Unlock</button><button id="cancelManagerUnlockBtn" class="secondary">Cancel</button><p id="managerUnlockError" class="error-message"></p></div></div>
     </div>
@@ -69,24 +109,25 @@
     <!-- <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> -->
 
     <script>
-       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDkJwykLgHJknOjhsplI_BC77DZJ1wc3Sc",
-  authDomain: "makersplayce-shift-planner.firebaseapp.com",
-  databaseURL: "https://makersplayce-shift-planner-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "makersplayce-shift-planner",
-  storageBucket: "makersplayce-shift-planner.firebasestorage.app",
-  messagingSenderId: "484080846181",
-  appId: "1:484080846181:web:3120dd6711d51a6e8f4d8c",
-  measurementId: "G-171W3Y9YQB"
-};
+        // Your Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkJwykLgHJknOjhsplI_BC77DZJ1wc3Sc",
+            authDomain: "makersplayce-shift-planner.firebaseapp.com",
+            databaseURL: "https://makersplayce-shift-planner-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "makersplayce-shift-planner",
+            storageBucket: "makersplayce-shift-planner.firebasestorage.app",
+            messagingSenderId: "484080846181",
+            appId: "1:484080846181:web:3120dd6711d51a6e8f4d8c",
+            measurementId: "G-171W3Y9YQB"
+        };
+
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // --- SCRIPT CONSTANTS AND VARIABLES START HERE ---
         const DEFAULT_MASTER_PASSWORD = "superadmin";
-        const ACTIVE_SESSION_USER_KEY = "activeShiftUser_v7_firebase_cached"; // Updated key for cache version
+        const ACTIVE_SESSION_USER_KEY = "activeShiftUser_v7_firebase_cached";
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         const shiftTimes = ["9:30 - 13:00", "13:00 - 16:30"];
@@ -97,10 +138,10 @@ const firebaseConfig = {
         let loggedInCoworker = null;
         let isManagerModeActive = false;
         let currentViewingDateMgr;
-        let allShiftsData = {}; // Re-introduced for client-side caching
+        let allShiftsData = {}; 
         let currentPastShiftViewDate;
         
-        // DOM Elements (Copied from your provided index.html)
+        // DOM Elements
         const initialLoginViewWrapper = document.getElementById('initialLoginViewWrapper');
         const loginUserSelect = document.getElementById('loginUserSelect');
         const loginPasswordInput = document.getElementById('loginPassword');
@@ -115,6 +156,15 @@ const firebaseConfig = {
         const userLogoutBtn = document.getElementById('userLogoutBtn');
         const userWeekDisplay = document.getElementById('userWeekDisplay');
         const userShiftsTableBody = document.getElementById('userShiftsTable').getElementsByTagName('tbody')[0];
+        
+        // DOM Elements for "My Past Shifts" section
+        const myPastShiftsSection = document.getElementById('myPastShiftsSection');
+        const prevPastPeriodBtn = document.getElementById('prevPastPeriodBtn');
+        const pastShiftsViewTypeSelect = document.getElementById('pastShiftsViewTypeSelect');
+        const nextPastPeriodBtn = document.getElementById('nextPastPeriodBtn');
+        const myPastShiftsPeriodDisplay = document.getElementById('myPastShiftsPeriodDisplay');
+        const myPastShiftsTableBody = document.getElementById('myPastShiftsTable').getElementsByTagName('tbody')[0];
+
         const managerUnlockModal = document.getElementById('managerUnlockModal');
         const masterManagerPasswordInput = document.getElementById('masterManagerPasswordInput');
         const unlockManagerPanelBtn = document.getElementById('unlockManagerPanelBtn');
@@ -163,19 +213,19 @@ const firebaseConfig = {
         
         // --- Initialization ---
         async function initializeApp() {
-    try {
-        await loadMasterPassword();
-        currentViewingDateMgr = getNextWeekStartDate(); // For manager view
-        currentPastShiftViewDate = getMondayOfDate(new Date()); // Initialize for user's past shifts view
-        await initializeCoworkers(); 
-        console.log("initializeApp: Coworkers loaded, length:", coworkers.length);
-        populateLoginUserDropdown(); 
-        checkActiveSession();
-    } catch (error) {
-        console.error("Error during app initialization:", error);
-        initialLoginError.textContent = "Failed to initialize. Check console for details.";
-    }
-    }
+            try {
+                await loadMasterPassword();
+                currentViewingDateMgr = getNextWeekStartDate(); 
+                currentPastShiftViewDate = getMondayOfDate(new Date()); 
+                await initializeCoworkers(); 
+                console.log("initializeApp: Coworkers loaded, length:", coworkers.length);
+                populateLoginUserDropdown(); 
+                checkActiveSession();
+            } catch (error) {
+                console.error("Error during app initialization:", error);
+                initialLoginError.textContent = "Failed to initialize. Check console for details.";
+            }
+        }
 
         async function loadMasterPassword() {
             try {
@@ -201,12 +251,10 @@ const firebaseConfig = {
 
         async function getWeekData(weekStartDate) {
             const weekKey = getWeekKey(weekStartDate);
-            // Check cache first
             if (allShiftsData[weekKey]) {
                 console.log(`Serving week ${weekKey} from cache.`);
                 return allShiftsData[weekKey];
             }
-
             const weekDocRef = db.collection('shifts').doc(weekKey);
             try {
                 console.log(`Fetching week ${weekKey} from Firestore...`);
@@ -215,7 +263,7 @@ const firebaseConfig = {
                     const data = doc.data();
                     if (!data.shifts) data.shifts = [];
                     data.shifts.forEach(s => { if (s.applicants === undefined) s.applicants = []; });
-                    allShiftsData[weekKey] = data; // Cache the data
+                    allShiftsData[weekKey] = data;
                     return data;
                 } else {
                     console.log(`Week data for ${weekKey} not found in Firestore, generating...`);
@@ -231,7 +279,7 @@ const firebaseConfig = {
                     }
                     const newWeekData = { shifts: newWeekShifts, isPublished: false };
                     await weekDocRef.set(newWeekData);
-                    allShiftsData[weekKey] = newWeekData; // Cache the newly generated data
+                    allShiftsData[weekKey] = newWeekData;
                     return newWeekData;
                 }
             } catch (error) {
@@ -259,7 +307,7 @@ const firebaseConfig = {
         }
 
         // --- View Switching & Session ---
-        function showCorrectView() { [initialLoginViewWrapper, userShiftViewWrapper, managerDashboardView, managerUnlockModal, changeMasterPasswordSection].forEach(v => v.classList.add('hidden')); if (isManagerModeActive && loggedInCoworker && loggedInCoworker.isManager) { managerDashboardView.classList.remove('hidden'); managerLoggedInAs.textContent = `Logged in as: ${loggedInCoworker.name}`; refreshManagerDashboard(); } else if (loggedInCoworker) { userShiftViewWrapper.classList.remove('hidden'); prepareUserView(); } else { initialLoginViewWrapper.classList.remove('hidden'); } }
+        function showCorrectView() { [initialLoginViewWrapper, userShiftViewWrapper, managerDashboardView, managerUnlockModal, changeMasterPasswordSection, myPastShiftsSection].forEach(v => { if(v) v.classList.add('hidden')}); if (isManagerModeActive && loggedInCoworker && loggedInCoworker.isManager) { managerDashboardView.classList.remove('hidden'); managerLoggedInAs.textContent = `Logged in as: ${loggedInCoworker.name}`; refreshManagerDashboard(); } else if (loggedInCoworker) { userShiftViewWrapper.classList.remove('hidden'); prepareUserView(); } else { initialLoginViewWrapper.classList.remove('hidden'); } }
         function checkActiveSession() { const activeUserJSON = localStorage.getItem(ACTIVE_SESSION_USER_KEY); if (activeUserJSON) { const activeUser = JSON.parse(activeUserJSON); const foundCoworker = coworkers.find(c => c.name === activeUser.name); if (foundCoworker) { if(activeUser.password === foundCoworker.password){ loggedInCoworker = foundCoworker; } else { logout(); return; } } else { logout(); return; } } showCorrectView(); }
         function populateLoginUserDropdown() { loginUserSelect.innerHTML = '<option value="">-- Select Name --</option>'; console.log("Populating dropdown, coworkers:", JSON.stringify(coworkers)); coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(coworker => { const option = document.createElement('option'); option.value = coworker.name; option.textContent = coworker.name; loginUserSelect.appendChild(option); }); }
         
@@ -270,45 +318,37 @@ const firebaseConfig = {
         function logout() { loggedInCoworker = null; isManagerModeActive = false; localStorage.removeItem(ACTIVE_SESSION_USER_KEY); loginPasswordInput.value = ""; masterManagerPasswordInput.value = ""; initialLoginError.textContent = ""; managerUnlockError.textContent = ""; changeMasterPasswordSection.classList.add('hidden'); showCorrectView(); }
 
         async function prepareUserView() {
-    if (!loggedInCoworker) return;
-    welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
-    accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
+            if (!loggedInCoworker) return;
+            welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
+            accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
 
-    // Show and render "My Past Shifts" section
-    if (myPastShiftsSection) { // Check if the element exists
-        myPastShiftsSection.classList.remove('hidden');
-        // Optionally reset currentPastShiftViewDate to current date's week/month each time user view is prepared
-        // currentPastShiftViewDate = getMondayOfDate(new Date()); 
-        await renderMyPastShifts(); // Call the rendering function
-    } else {
-        console.error("myPastShiftsSection element not found!");
-    }
+            if (myPastShiftsSection) { 
+                myPastShiftsSection.classList.remove('hidden');
+                await renderMyPastShifts(); 
+            } else {
+                console.error("myPastShiftsSection element not found in prepareUserView!");
+            }
 
-    try {
-        // Display latest published schedule (existing logic)
-        const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get();
-        if (!querySnapshot.empty) {
-            const latestPublishedWeekKey = querySnapshot.docs[0].id;
-            // Use getWeekData to leverage cache if data for this week was already fetched
-            const latestPublishedWeekData = await getWeekData(new Date(latestPublishedWeekKey)); 
-            latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
-            renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
-            latestPublishedScheduleSection.classList.remove('hidden');
-        } else {
-            latestPublishedScheduleSection.classList.add('hidden');
+            try {
+                const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get();
+                if (!querySnapshot.empty) {
+                    const latestPublishedWeekKey = querySnapshot.docs[0].id;
+                    const latestPublishedWeekData = await getWeekData(new Date(latestPublishedWeekKey)); 
+                    latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
+                    renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
+                    latestPublishedScheduleSection.classList.remove('hidden');
+                } else {
+                    latestPublishedScheduleSection.classList.add('hidden');
+                }
+                const applicationWeekStartDate = getNextWeekStartDate();
+                userWeekDisplay.textContent = `Application Week: ${formatDate(applicationWeekStartDate, false)}`;
+                const shiftsToDisplayForApplication = await getShiftsForWeek(applicationWeekStartDate);
+                renderUserShifts(shiftsToDisplayForApplication, applicationWeekStartDate);
+            } catch (error) { 
+                console.error("Error preparing user view (published/application schedule):", error); 
+                if(userWeekDisplay) userWeekDisplay.textContent = "Error loading application shifts."; 
+            }
         }
-        
-        // Display application week (existing logic)
-        const applicationWeekStartDate = getNextWeekStartDate();
-        userWeekDisplay.textContent = `Application Week: ${formatDate(applicationWeekStartDate, false)}`;
-        const shiftsToDisplayForApplication = await getShiftsForWeek(applicationWeekStartDate);
-        renderUserShifts(shiftsToDisplayForApplication, applicationWeekStartDate);
-    } catch (error) { 
-        console.error("Error preparing user view (published/application schedule):", error); 
-        // Keep userWeekDisplay error specific if needed, or have a general error display area
-        if(userWeekDisplay) userWeekDisplay.textContent = "Error loading application shifts."; 
-    }
-    }
 
         // --- Rendering Logic ---
         function renderUserShifts(shiftsForWeek, forWeekDate) { userShiftsTableBody.innerHTML = ""; shiftsForWeek.forEach(shift => { const row = userShiftsTableBody.insertRow(); row.insertCell().textContent = shift.day; row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.time; const statusCell = row.insertCell(); const applicantsAssignedCell = row.insertCell(); const actionCell = row.insertCell(); const isMyAppPending = shift.status === 'pending' && shift.applicants.includes(loggedInCoworker.name); const isApproved = shift.status === 'approved'; if (isApproved) { statusCell.textContent = "Approved"; statusCell.className = 'status-approved'; applicantsAssignedCell.textContent = shift.applicantName; actionCell.textContent = "---"; } else if (isMyAppPending) { statusCell.textContent = "Pending"; statusCell.className = 'status-pending'; applicantsAssignedCell.textContent = loggedInCoworker.name; const cancelBtn = document.createElement('button'); cancelBtn.textContent = "Cancel App"; cancelBtn.classList.add("deny"); cancelBtn.onclick = () => cancelApplication(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(cancelBtn); } else { statusCell.textContent = "Available"; statusCell.className = 'status-available'; applicantsAssignedCell.textContent = "---"; const applyButton = document.createElement('button'); applyButton.textContent = "Apply"; applyButton.classList.add("apply"); applyButton.onclick = () => applyForShift(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(applyButton); } }); }
@@ -325,6 +365,75 @@ const firebaseConfig = {
                 }
             }
         } const sortedCoworkers = Object.keys(hoursData).sort(); sortedCoworkers.forEach(name => { const item = document.createElement('div'); item.classList.add('hours-overview-item'); item.textContent = `${name}: ${hoursData[name].toFixed(1)} hrs`; hoursOverviewList.appendChild(item); }); }
+        
+        async function renderMyPastShifts() {
+            if (!loggedInCoworker) {
+                if (myPastShiftsSection) myPastShiftsSection.classList.add('hidden');
+                return;
+            }
+            if (!myPastShiftsSection) { // Double check if the element truly doesn't exist.
+                console.error("renderMyPastShifts: myPastShiftsSection element not found!");
+                return;
+            }
+            myPastShiftsSection.classList.remove('hidden'); 
+
+            const viewType = pastShiftsViewTypeSelect.value; 
+            myPastShiftsTableBody.innerHTML = ""; 
+
+            let periodStart;
+            let periodEnd;
+            let displayPeriodString = "";
+
+            if (viewType === "weekly") {
+                periodStart = getMondayOfDate(new Date(currentPastShiftViewDate)); 
+                periodEnd = new Date(periodStart);
+                periodEnd.setDate(periodStart.getDate() + 6); 
+                displayPeriodString = `Week of ${formatDate(periodStart, false)}`;
+            } else { 
+                periodStart = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth(), 1);
+                periodEnd = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth() + 1, 0); 
+                displayPeriodString = `${periodStart.toLocaleString('default', { month: 'long' })} ${periodStart.getFullYear()}`;
+            }
+            myPastShiftsPeriodDisplay.textContent = displayPeriodString;
+
+            const userPastShifts = [];
+            try {
+                // Iterate through the client-side cache for past shifts
+                for (const weekKey in allShiftsData) {
+                    const weekData = allShiftsData[weekKey];
+                    if (weekData && weekData.shifts) {
+                        weekData.shifts.forEach(shift => {
+                            const shiftDate = new Date(shift.date);
+                            if (
+                                shift.status === 'approved' &&
+                                shift.applicantName === loggedInCoworker.name &&
+                                shiftDate >= periodStart &&
+                                shiftDate <= periodEnd
+                            ) {
+                                userPastShifts.push(shift);
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Error processing cached shifts for past history:", error);
+                myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">Error loading past shifts.</td></tr>`;
+                return;
+            }
+
+            if (userPastShifts.length === 0) {
+                myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">No approved shifts found for this period.</td></tr>`;
+                return;
+            }
+            userPastShifts.sort((a, b) => new Date(a.date) - new Date(b.date));
+            userPastShifts.forEach(shift => {
+                const row = myPastShiftsTableBody.insertRow();
+                row.insertCell().textContent = formatDate(new Date(shift.date), false); 
+                row.insertCell().textContent = shift.day;
+                row.insertCell().textContent = shift.time;
+            });
+        }
+
         async function renderTotalHoursSummary() {
             totalHoursSummaryTableBody.innerHTML = "";
             const period = totalHoursPeriodSelect.value;
@@ -336,24 +445,26 @@ const firebaseConfig = {
             } else if (period === "viewing_month") {
                 const targetMonth = currentViewingDateMgr.getMonth();
                 const targetYear = currentViewingDateMgr.getFullYear();
-                // Iterate cached data for the month
-                for (const weekKey in allShiftsData) {
-                    const weekStartDate = new Date(weekKey);
-                    if (weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear) {
-                        shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts);
+                for (const weekKey in allShiftsData) { // Use cached data
+                    if (allShiftsData[weekKey] && allShiftsData[weekKey].shifts) {
+                        const weekStartDate = new Date(weekKey);
+                        if(weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear) {
+                            shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts);
+                        }
                     }
                 }
-                // If no cached data for other weeks in month, this will only show current week's data for the month.
-                // A full solution would fetch missing weeks of the month.
-            } else if (period === "all_loaded") { // All data currently in the client-side cache
-                for (const weekKey in allShiftsData) {
-                    shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts);
+            } else if (period === "all_loaded") { // Use all cached data
+                 for (const weekKey in allShiftsData) {
+                    if (allShiftsData[weekKey] && allShiftsData[weekKey].shifts) {
+                        shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts);
+                    }
                 }
             }
             shiftsToConsider.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (summaryData.hasOwnProperty(s.applicantName)) { summaryData[s.applicantName] += SHIFT_DURATION_HOURS; } });
             const sortedCoworkerNames = Object.keys(summaryData).sort();
             sortedCoworkerNames.forEach(name => { const row = totalHoursSummaryTableBody.insertRow(); row.insertCell().textContent = name; row.insertCell().textContent = summaryData[name].toFixed(1) + " hrs"; });
         }
+
 
         // --- Shift Actions (Writes to Firestore) ---
         async function applyForShift(shiftId, weekKey) {
@@ -373,7 +484,7 @@ const firebaseConfig = {
                     weekData.shifts[shiftIndex].status = "pending";
                     weekData.shifts[shiftIndex].applicantName = "";
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
-                    allShiftsData[weekKey] = weekData; // Update cache
+                    allShiftsData[weekKey] = weekData; 
                 });
                 await prepareUserView(); if (isManagerModeActive) await refreshManagerDashboard();
             } catch (error) { console.error("Error applying for shift:", error); alert("Failed to apply: " + error); }
@@ -393,7 +504,7 @@ const firebaseConfig = {
                     weekData.shifts[shiftIndex].applicants = shift.applicants.filter(name => name !== loggedInCoworker.name);
                     if (weekData.shifts[shiftIndex].applicants.length === 0) { weekData.shifts[shiftIndex].status = "available"; }
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
-                    allShiftsData[weekKey] = weekData; // Update cache
+                    allShiftsData[weekKey] = weekData; 
                 });
                 await prepareUserView(); if (isManagerModeActive) await refreshManagerDashboard();
             } catch (error) { console.error("Error cancelling application:", error); alert("Failed to cancel application: " + error); }
@@ -412,7 +523,7 @@ const firebaseConfig = {
                     weekData.shifts[shiftIndex].applicantName = selectedApplicantName;
                     weekData.shifts[shiftIndex].applicants = [];
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
-                    allShiftsData[weekKey] = weekData; // Update cache
+                    allShiftsData[weekKey] = weekData; 
                 });
                 await refreshManagerDashboard(); await prepareUserView();
             } catch (error) { console.error("Error approving shift:", error); alert("Failed to approve shift: " + error); }
@@ -430,7 +541,7 @@ const firebaseConfig = {
                     weekData.shifts[shiftIndex].applicantName = "";
                     weekData.shifts[shiftIndex].applicants = [];
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
-                    allShiftsData[weekKey] = weekData; // Update cache
+                    allShiftsData[weekKey] = weekData; 
                 });
                 await refreshManagerDashboard(); await prepareUserView();
             } catch (error) { console.error("Error denying applicants:", error); alert("Failed to deny applicants: " + error); }
@@ -449,7 +560,7 @@ const firebaseConfig = {
                     weekData.shifts[shiftIndex].applicantName = "";
                     weekData.shifts[shiftIndex].applicants = [];
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
-                    allShiftsData[weekKey] = weekData; // Update cache
+                    allShiftsData[weekKey] = weekData; 
                 });
                 await refreshManagerDashboard(); await prepareUserView();
             } catch (error) { console.error("Error clearing approved shift:", error); alert("Failed to clear approved shift: " + error); }
@@ -468,7 +579,7 @@ const firebaseConfig = {
                     weekData.shifts[shiftIndex].applicantName = coworkerName;
                     weekData.shifts[shiftIndex].applicants = [];
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
-                    allShiftsData[weekKey] = weekData; // Update cache
+                    allShiftsData[weekKey] = weekData; 
                 });
                 await refreshManagerDashboard(); await prepareUserView();
             } catch (error) { console.error("Error manually assigning shift:", error); alert("Failed to manually assign shift: " + error); }
@@ -477,17 +588,16 @@ const firebaseConfig = {
             const weekKey = getWeekKey(currentViewingDateMgr);
             const weekDocRef = db.collection('shifts').doc(weekKey);
             try {
-                const weekDoc = await weekDocRef.get(); // Get latest from Firestore
+                const weekDoc = await weekDocRef.get(); 
                 if (!weekDoc.exists) { alert("Cannot publish/unpublish a non-existent week."); return; }
                 const currentIsPublished = weekDoc.data().isPublished;
                 const newPublishStatus = !currentIsPublished;
                 await weekDocRef.update({ isPublished: newPublishStatus });
                 
-                // Update cache
                 if (allShiftsData[weekKey]) {
                     allShiftsData[weekKey].isPublished = newPublishStatus;
-                } else { // Should ideally be in cache if we viewed it, but as a fallback
-                    allShiftsData[weekKey] = { ...(await weekDocRef.get()).data() }; // Re-fetch and cache
+                } else { 
+                    allShiftsData[weekKey] = { ...(await weekDocRef.get()).data() }; 
                 }
 
                 alert(`Week of ${formatDate(currentViewingDateMgr, false)} has been ${newPublishStatus ? 'Published' : 'Unpublished'}.`);
@@ -515,6 +625,32 @@ const firebaseConfig = {
         totalHoursPeriodSelect.addEventListener('change', () => refreshManagerDashboard());
         resetAllDataBtn.addEventListener('click', handleResetAllData); addCoworkerBtn.addEventListener('click', handleAddCoworker); newCoworkerPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddCoworker(); });
         
+        // Event Listeners for "My Past Shifts" section
+        prevPastPeriodBtn.addEventListener('click', () => {
+            const viewType = pastShiftsViewTypeSelect.value;
+            if (viewType === "weekly") {
+                currentPastShiftViewDate.setDate(currentPastShiftViewDate.getDate() - 7);
+            } else { // monthly
+                currentPastShiftViewDate.setMonth(currentPastShiftViewDate.getMonth() - 1);
+            }
+            renderMyPastShifts();
+        });
+
+        nextPastPeriodBtn.addEventListener('click', () => {
+            const viewType = pastShiftsViewTypeSelect.value;
+            if (viewType === "weekly") {
+                currentPastShiftViewDate.setDate(currentPastShiftViewDate.getDate() + 7);
+            } else { // monthly
+                currentPastShiftViewDate.setMonth(currentPastShiftViewDate.getMonth() + 1);
+            }
+            renderMyPastShifts();
+        });
+
+        pastShiftsViewTypeSelect.addEventListener('change', () => {
+            currentPastShiftViewDate = getMondayOfDate(new Date()); 
+            renderMyPastShifts();
+        });
+
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
