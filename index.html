@@ -371,7 +371,7 @@
                 if (myPastShiftsSection) myPastShiftsSection.classList.add('hidden');
                 return;
             }
-            if (!myPastShiftsSection) { // Double check if the element truly doesn't exist.
+            if (!myPastShiftsSection) { 
                 console.error("renderMyPastShifts: myPastShiftsSection element not found!");
                 return;
             }
@@ -388,10 +388,12 @@
                 periodStart = getMondayOfDate(new Date(currentPastShiftViewDate)); 
                 periodEnd = new Date(periodStart);
                 periodEnd.setDate(periodStart.getDate() + 6); 
+                periodEnd.setHours(23, 59, 59, 999); // Ensure end of day for accurate comparison
                 displayPeriodString = `Week of ${formatDate(periodStart, false)}`;
             } else { 
                 periodStart = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth(), 1);
                 periodEnd = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth() + 1, 0); 
+                periodEnd.setHours(23, 59, 59, 999); // Ensure end of day for accurate comparison
                 displayPeriodString = `${periodStart.toLocaleString('default', { month: 'long' })} ${periodStart.getFullYear()}`;
             }
             myPastShiftsPeriodDisplay.textContent = displayPeriodString;
