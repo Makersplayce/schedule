@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shift Scheduler Pro - Firebase Write</title>
+    <title>Shift Scheduler Pro - Full Firebase</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; background-color: #f4f4f4; color: #333; }
         .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
@@ -69,14 +69,16 @@
     <!-- <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> -->
 
     <script>
-        // Your Firebase project configuration
+        // Your Firebase project configuration - REPLACE WITH YOUR ACTUAL VALUES
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // <<<<< REPLACE THIS
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // <<<<< REPLACE THIS
-            projectId: "YOUR_PROJECT_ID", // <<<<< REPLACE THIS
-            storageBucket: "YOUR_PROJECT_ID.appspot.com", // <<<<< REPLACE THIS
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // <<<<< REPLACE THIS
-            appId: "YOUR_APP_ID" // <<<<< REPLACE THIS
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "YOUR_DATABASE_URL_IF_USING_REALTIMEDB_AS_WELL", // Not strictly needed if only Firestore
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID" // Optional
         };
 
         // Initialize Firebase
@@ -316,13 +318,13 @@
                     const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId);
                     if (shiftIndex === -1) throw "Shift not found!";
                     const shift = weekData.shifts[shiftIndex];
-                    if (shift.status !== 'pending' || !shift.applicants.includes(loggedInCoworker.name)) { alert("Cannot cancel."); return; }
+                    if (shift.status !== 'pending' || !shift.applicants.includes(loggedInCoworker.name)) { alert("Cannot cancel this application."); return; }
                     weekData.shifts[shiftIndex].applicants = shift.applicants.filter(name => name !== loggedInCoworker.name);
                     if (weekData.shifts[shiftIndex].applicants.length === 0) { weekData.shifts[shiftIndex].status = "available"; }
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
                 });
                 await prepareUserView(); if (isManagerModeActive) await refreshManagerDashboard();
-            } catch (error) { console.error("Error cancelling application:", error); alert("Failed to cancel: " + error); }
+            } catch (error) { console.error("Error cancelling application:", error); alert("Failed to cancel application: " + error); }
         }
         async function managerApproveSelectedApplicant(shiftId, weekKey, selectedApplicantName) {
             const weekDocRef = db.collection('shifts').doc(weekKey);
@@ -333,14 +335,14 @@
                     const weekData = weekDoc.data();
                     const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId);
                     if (shiftIndex === -1) throw "Shift not found!";
-                    if (weekData.shifts[shiftIndex].status !== 'pending') { alert("Shift not pending."); return; }
+                    if (weekData.shifts[shiftIndex].status !== 'pending') { alert("Shift is not pending approval."); return; }
                     weekData.shifts[shiftIndex].status = "approved";
                     weekData.shifts[shiftIndex].applicantName = selectedApplicantName;
                     weekData.shifts[shiftIndex].applicants = [];
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
                 });
                 await refreshManagerDashboard(); await prepareUserView();
-            } catch (error) { console.error("Error approving shift:", error); alert("Failed to approve: " + error); }
+            } catch (error) { console.error("Error approving shift:", error); alert("Failed to approve shift: " + error); }
         }
         async function managerDenyAllApplicants(shiftId, weekKey) {
             const weekDocRef = db.collection('shifts').doc(weekKey);
@@ -357,7 +359,7 @@
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
                 });
                 await refreshManagerDashboard(); await prepareUserView();
-            } catch (error) { console.error("Error denying applicants:", error); alert("Failed to deny: " + error); }
+            } catch (error) { console.error("Error denying applicants:", error); alert("Failed to deny applicants: " + error); }
         }
         async function managerClearApprovedShift(shiftId, weekKey) {
             const weekDocRef = db.collection('shifts').doc(weekKey);
@@ -368,17 +370,17 @@
                     const weekData = weekDoc.data();
                     const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId);
                     if (shiftIndex === -1) throw "Shift not found!";
-                    if (weekData.shifts[shiftIndex].status !== 'approved') { alert("Shift not approved."); return; }
+                    if (weekData.shifts[shiftIndex].status !== 'approved') { alert("Shift is not currently approved."); return; }
                     weekData.shifts[shiftIndex].status = "available";
                     weekData.shifts[shiftIndex].applicantName = "";
                     weekData.shifts[shiftIndex].applicants = [];
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
                 });
                 await refreshManagerDashboard(); await prepareUserView();
-            } catch (error) { console.error("Error clearing shift:", error); alert("Failed to clear: " + error); }
+            } catch (error) { console.error("Error clearing approved shift:", error); alert("Failed to clear approved shift: " + error); }
         }
         async function managerManuallyAssignShift(shiftId, weekKey, coworkerName) {
-            if (!coworkerName) { alert("Please select a coworker."); return; }
+            if (!coworkerName) { alert("Please select a coworker to assign."); return; }
             const weekDocRef = db.collection('shifts').doc(weekKey);
             try {
                 await db.runTransaction(async (transaction) => {
@@ -393,7 +395,7 @@
                     transaction.update(weekDocRef, { shifts: weekData.shifts });
                 });
                 await refreshManagerDashboard(); await prepareUserView();
-            } catch (error) { console.error("Error manually assigning shift:", error); alert("Failed to assign: " + error); }
+            } catch (error) { console.error("Error manually assigning shift:", error); alert("Failed to manually assign shift: " + error); }
         }
         async function handlePublishWeekToggle() {
             const weekKey = getWeekKey(currentViewingDateMgr);
@@ -403,17 +405,17 @@
                 if (!weekDoc.exists) { alert("Cannot publish/unpublish a non-existent week."); return; }
                 const currentIsPublished = weekDoc.data().isPublished;
                 await weekDocRef.update({ isPublished: !currentIsPublished });
-                alert(`Week has been ${!currentIsPublished ? 'Published' : 'Unpublished'}.`);
+                alert(`Week of ${formatDate(currentViewingDateMgr, false)} has been ${!currentIsPublished ? 'Published' : 'Unpublished'}.`);
                 await refreshManagerDashboard(); await prepareUserView();
-            } catch (error) { console.error("Error toggling publish:", error); alert("Failed to toggle publish: " + error); }
+            } catch (error) { console.error("Error toggling publish status:", error); alert("Failed to toggle publish status: " + error); }
         }
         
         // --- Manager: Coworker & Master Password (Writes to Firestore) ---
-        function renderCoworkerListForManager() { coworkerListDiv.innerHTML = "<h4>Current Coworkers:</h4>"; if (coworkers.length === 0) { coworkerListDiv.innerHTML += "<p>No coworkers.</p>"; return; } const ul = document.createElement('ul'); ul.style.listStyleType = 'none'; ul.style.paddingLeft = '0'; coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => { const li = document.createElement('li'); li.classList.add('coworker-management-item'); const nameSpan = document.createElement('span'); nameSpan.textContent = `${c.name} ${c.isManager ? '(Mgr)' : ''}`; li.appendChild(nameSpan); const actionDiv = document.createElement('div'); const changePassBtn = document.createElement('button'); changePassBtn.textContent = "Pwd"; changePassBtn.classList.add("secondary", "small-action"); changePassBtn.onclick = () => handleChangeCoworkerPassword(c.id); actionDiv.appendChild(changePassBtn); const toggleMgrBtn = document.createElement('button'); toggleMgrBtn.textContent = c.isManager ? "Demote" : "Promote"; toggleMgrBtn.classList.add("secondary", "small-action"); toggleMgrBtn.onclick = () => handleToggleManagerStatus(c.id); actionDiv.appendChild(toggleMgrBtn); const deleteBtn = document.createElement('button'); deleteBtn.textContent = "Del"; deleteBtn.classList.add("delete", "small-action"); deleteBtn.onclick = () => handleDeleteCoworker(c.id); actionDiv.appendChild(deleteBtn); li.appendChild(actionDiv); ul.appendChild(li); }); coworkerListDiv.appendChild(ul); }
+        function renderCoworkerListForManager() { coworkerListDiv.innerHTML = "<h4>Current Coworkers:</h4>"; if (coworkers.length === 0) { coworkerListDiv.innerHTML += "<p>No coworkers.</p>"; return; } const ul = document.createElement('ul'); ul.style.listStyleType = 'none'; ul.style.paddingLeft = '0'; coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => { const li = document.createElement('li'); li.classList.add('coworker-management-item'); const nameSpan = document.createElement('span'); nameSpan.textContent = `${c.name} ${c.isManager ? '(Mgr)' : ''}`; li.appendChild(nameSpan); const actionDiv = document.createElement('div'); const changePassBtn = document.createElement('button'); changePassBtn.textContent = "Pwd"; changePassBtn.classList.add("secondary", "small-action"); changePassBtn.onclick = () => handleChangeCoworkerPassword(c.id || c.name); actionDiv.appendChild(changePassBtn); const toggleMgrBtn = document.createElement('button'); toggleMgrBtn.textContent = c.isManager ? "Demote" : "Promote"; toggleMgrBtn.classList.add("secondary", "small-action"); toggleMgrBtn.onclick = () => handleToggleManagerStatus(c.id || c.name); actionDiv.appendChild(toggleMgrBtn); const deleteBtn = document.createElement('button'); deleteBtn.textContent = "Del"; deleteBtn.classList.add("delete", "small-action"); deleteBtn.onclick = () => handleDeleteCoworker(c.id || c.name); actionDiv.appendChild(deleteBtn); li.appendChild(actionDiv); ul.appendChild(li); }); coworkerListDiv.appendChild(ul); }
         async function handleAddCoworker() { const name = newCoworkerNameInput.value.trim(); const password = newCoworkerPasswordInput.value; const isManager = newCoworkerIsManagerCheckbox.checked; if (!name || !password) { alert("Name and password required."); return; } if (coworkers.find(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Coworker name already exists."); return; } try { await db.collection('coworkers').doc(name).set({ name, password, isManager }); await initializeCoworkers(); populateLoginUserDropdown(); renderCoworkerListForManager(); newCoworkerNameInput.value = ""; newCoworkerPasswordInput.value = ""; newCoworkerIsManagerCheckbox.checked = false; alert(`${name} added.`); } catch (error) { console.error("Error adding coworker:", error); alert("Failed to add: " + error); } }
-        async function handleDeleteCoworker(coworkerDocId) { const coworkerToDelete = coworkers.find(c => c.id === coworkerDocId); if (!coworkerToDelete) { alert("Coworker not found."); return;} if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) { alert("Cannot delete the last manager."); return; } if (!confirm(`Delete ${coworkerToDelete.name}?`)) return; try { await db.collection('coworkers').doc(coworkerDocId).delete(); const shiftsCollectionRef = db.collection('shifts'); const querySnapshot = await shiftsCollectionRef.get(); const batch = db.batch(); querySnapshot.forEach(weekDoc => { const weekKey = weekDoc.id; const weekData = weekDoc.data(); let modified = false; const updatedShifts = weekData.shifts.map(shift => { if (shift.applicantName === coworkerToDelete.name) { shift.applicantName = ""; shift.status = "available"; modified = true; } if (shift.applicants && shift.applicants.includes(coworkerToDelete.name)) { shift.applicants = shift.applicants.filter(name => name !== coworkerToDelete.name); if (shift.status === "pending" && shift.applicants.length === 0) { shift.status = "available"; } modified = true; } return shift; }); if (modified) { batch.update(shiftsCollectionRef.doc(weekKey), { shifts: updatedShifts }); } }); await batch.commit(); await initializeCoworkers(); populateLoginUserDropdown(); if (loggedInCoworker && loggedInCoworker.id === coworkerDocId) logout(); else { if (isManagerModeActive) await refreshManagerDashboard(); await prepareUserView(); } alert(`${coworkerToDelete.name} deleted.`); } catch (error) { console.error("Error deleting coworker:", error); alert("Failed to delete: " + error); } }
-        async function handleChangeCoworkerPassword(coworkerDocId) { const newPassword = prompt(`Enter new password for this coworker:`); if (newPassword === null) return; if (!newPassword.trim()) { alert("Password cannot be empty."); return; } try { await db.collection('coworkers').doc(coworkerDocId).update({ password: newPassword.trim() }); const localCoworker = coworkers.find(c => c.id === coworkerDocId); if (localCoworker) localCoworker.password = newPassword.trim(); if (loggedInCoworker && loggedInCoworker.id === coworkerDocId) { loggedInCoworker.password = newPassword.trim(); localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({name: loggedInCoworker.name, password: loggedInCoworker.password})); } alert(`Password updated.`); } catch (error) { console.error("Error changing password:", error); alert("Failed to change: " + error); } }
-        async function handleToggleManagerStatus(coworkerDocId) { const coworkerToToggle = coworkers.find(c => c.id === coworkerDocId); if (!coworkerToToggle) return; const newManagerStatus = !coworkerToToggle.isManager; if (coworkerToToggle.isManager && coworkers.filter(c => c.isManager).length <= 1) { alert("Cannot demote the last manager."); return; } try { await db.collection('coworkers').doc(coworkerDocId).update({ isManager: newManagerStatus }); coworkerToToggle.isManager = newManagerStatus; renderCoworkerListForManager(); if (loggedInCoworker && loggedInCoworker.id === coworkerDocId) { loggedInCoworker.isManager = newManagerStatus; accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager); if (!loggedInCoworker.isManager && isManagerModeActive) { isManagerModeActive = false; showCorrectView(); } } alert(`Manager status updated.`); } catch (error) { console.error("Error toggling manager status:", error); alert("Failed to toggle: " + error); } }
+        async function handleDeleteCoworker(coworkerDocIdOrName) { const coworkerToDelete = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName); if (!coworkerToDelete) { alert("Coworker not found."); return;} if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) { alert("Cannot delete the last manager."); return; } if (!confirm(`Delete ${coworkerToDelete.name}?`)) return; try { await db.collection('coworkers').doc(coworkerToDelete.id || coworkerToDelete.name).delete(); const shiftsCollectionRef = db.collection('shifts'); const querySnapshot = await shiftsCollectionRef.get(); const batch = db.batch(); let changesMadeToShifts = false; querySnapshot.forEach(weekDoc => { const weekKey = weekDoc.id; const weekData = weekDoc.data(); let weekModified = false; const updatedShifts = weekData.shifts.map(shift => { let shiftChanged = false; if (shift.applicantName === coworkerToDelete.name) { shift.applicantName = ""; shift.status = "available"; shiftChanged = true; } if (shift.applicants && shift.applicants.includes(coworkerToDelete.name)) { shift.applicants = shift.applicants.filter(name => name !== coworkerToDelete.name); if (shift.status === "pending" && shift.applicants.length === 0) { shift.status = "available"; } shiftChanged = true; } if(shiftChanged) weekModified = true; return shift; }); if (weekModified) { batch.update(shiftsCollectionRef.doc(weekKey), { shifts: updatedShifts }); changesMadeToShifts = true; } }); if (changesMadeToShifts) { await batch.commit(); } await initializeCoworkers(); populateLoginUserDropdown(); if (loggedInCoworker && loggedInCoworker.name === coworkerToDelete.name) logout(); else { if (isManagerModeActive) await refreshManagerDashboard(); await prepareUserView(); } alert(`${coworkerToDelete.name} deleted.`); } catch (error) { console.error("Error deleting coworker:", error); alert("Failed to delete: " + error); } }
+        async function handleChangeCoworkerPassword(coworkerDocIdOrName) { const newPassword = prompt(`Enter new password for this coworker:`); if (newPassword === null) return; if (!newPassword.trim()) { alert("Password cannot be empty."); return; } try { await db.collection('coworkers').doc(coworkerDocIdOrName).update({ password: newPassword.trim() }); const localCoworker = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName); if (localCoworker) localCoworker.password = newPassword.trim(); if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) { loggedInCoworker.password = newPassword.trim(); localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({name: loggedInCoworker.name, password: loggedInCoworker.password})); } alert(`Password updated.`); } catch (error) { console.error("Error changing password:", error); alert("Failed to change: " + error); } }
+        async function handleToggleManagerStatus(coworkerDocIdOrName) { const coworkerToToggle = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName); if (!coworkerToToggle) return; const newManagerStatus = !coworkerToToggle.isManager; if (coworkerToToggle.isManager && coworkers.filter(c => c.isManager).length <= 1) { alert("Cannot demote the last manager."); return; } try { await db.collection('coworkers').doc(coworkerDocIdOrName).update({ isManager: newManagerStatus }); coworkerToToggle.isManager = newManagerStatus; renderCoworkerListForManager(); if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) { loggedInCoworker.isManager = newManagerStatus; accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager); if (!loggedInCoworker.isManager && isManagerModeActive) { isManagerModeActive = false; showCorrectView(); } } alert(`Manager status updated for ${coworkerToToggle.name}.`); } catch (error) { console.error("Error toggling manager status:", error); alert("Failed to toggle: " + error); } }
         async function handleSubmitChangeMasterPassword() { changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; const currentPassAttempt = currentMasterPasswordInput.value; const newPass = newMasterPasswordInput.value; const confirmPass = confirmNewMasterPasswordInput.value; if (currentPassAttempt !== currentMasterPassword) { changeMasterPassError.textContent = "Current Master Password incorrect."; return; } if (!newPass || newPass.length < 6) { changeMasterPassError.textContent = "New password must be at least 6 characters."; return; } if (newPass !== confirmPass) { changeMasterPassError.textContent = "New passwords do not match."; return; } try { await db.collection('config').doc('adminConfig').set({ masterAdminPassword: newPass }, { merge: true }); currentMasterPassword = newPass; changeMasterPassSuccess.textContent = "Master Admin Password changed successfully!"; currentMasterPasswordInput.value = ""; newMasterPasswordInput.value = ""; confirmNewMasterPasswordInput.value = ""; setTimeout(() => { changeMasterPasswordSection.classList.add('hidden'); changeMasterPassSuccess.textContent = ""; }, 2000); } catch (error) { console.error("Error updating master password:", error); changeMasterPassError.textContent = "Failed to update."; } }
         async function handleResetAllData() { if (confirm("This will clear your local session. Data in Firestore will NOT be deleted by this action. Are you sure?")) { loggedInCoworker = null; isManagerModeActive = false; localStorage.removeItem(ACTIVE_SESSION_USER_KEY); await initializeApp(); alert("Local session reset. App re-initialized from Firestore."); } }
         
