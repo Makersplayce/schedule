@@ -21,12 +21,14 @@
         .manager-hours-column { flex: 1; background-color: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #eee; min-width: 0; }
         .manager-hours-column h3 { margin-top: 0; } .manager-hours-column .input-group select { width: 100%; }
         .manager-schedule-preview { background-color: #fdfdfd; padding:15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #eee;}
+        .add-shift-section { background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #cce5ff;}
+        .add-shift-section .input-group select { width: auto; min-width: 150px; margin-right: 10px; }
         h1, h2, h3, h4 { color: #333; text-align: center; }
         h3 { margin-top: 25px; margin-bottom: 10px;} h4 { margin-top: 15px; margin-bottom: 5px; text-align: left;}
         table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
         th { background-color: #f0f0f0; }
-        td.action-cell { min-width: 200px; text-align: center;}
+        td.action-cell { min-width: 220px; text-align: center;} /* Increased width for more buttons */
         td.action-cell select { margin-bottom: 5px; width: 100%; padding: 5px; font-size: 0.9em;}
         .input-group { margin-bottom: 15px; } .input-group label { display: block; margin-bottom: 5px; }
         .input-group input[type="text"], .input-group input[type="password"], .input-group select { width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
@@ -70,13 +72,11 @@
                 </div>
                 <div id="userShiftView" class="container view-section">
                     <div class="top-bar"><h2 id="welcomeUserName">Welcome, [User]!</h2><div><button id="accessManagerPanelBtn" class="secondary hidden">Manager Panel</button><button id="userLogoutBtn" class="secondary">Logout</button></div></div>
-                    
                     <div class="week-navigation" id="userApplicationWeekNav" style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
                         <button id="prevUserAppWeekBtn" class="small-action">« Prev App Week</button>
                         <strong id="currentUserAppWeekDisplay" style="margin: 0 10px; font-size: 1.1em;"></strong>
                         <button id="nextUserAppWeekBtn" class="small-action">Next App Week »</button>
                     </div>
-                    
                     <h3>Available Shifts & Your Applications</h3>
                     <table id="userShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time</th><th>Status</th><th>Your Status / Assigned</th><th>Action</th></tr></thead><tbody></tbody></table>
                 </div>
@@ -92,20 +92,52 @@
                     </div>
                     <p style="text-align:center; font-size:0.9em;" id="myPastShiftsPeriodDisplay"></p>
                     <table id="myPastShiftsTable">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Day</th>
-                                <th>Time</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Date</th><th>Day</th><th>Time</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div id="managerDashboardView" class="manager-dashboard hidden"><div class="manager-top-bar"><h1>Manager Dashboard</h1><div><span id="managerLoggedInAs" style="margin-right:20px;"></span><button id="switchToUserViewBtn" class="secondary small-action">My Shifts View</button><button id="managerDashboardLogoutBtn" class="secondary small-action">Logout</button></div></div><div class="manager-body"><div class="manager-sidebar"><h4>Week Navigation</h4><div class="week-navigation"><button id="prevWeekBtnMgr" class="small-action">« Prev Wk</button><button id="jumpToTargetWeekBtnMgr" class="small-action">Next Wk</button><button id="nextWeekBtnMgr" class="small-action">Further Wk »</button></div><p style="text-align:center; font-size:0.9em; margin-bottom:5px;" id="managerSidebarWeekDisplay"></p><hr><h4>Week Actions</h4><button id="publishWeekBtn" class="publish small-action" style="width:100%; margin-bottom:5px;">Publish Week</button><div id="publishStatusIndicator" class="published-status-indicator">Status: Not Published</div><hr><h4>Admin Settings</h4><button id="showChangeMasterPassBtn" class="secondary small-action" style="width:100%; margin-bottom:10px;">Change Master Password</button><button id="resetAllDataBtn" class="delete small-action" style="width:100%;">Reset All Data</button></div><div class="manager-main-content"><div id="changeMasterPasswordSection" class="container hidden" style="border: 1px solid #ffc107; background: #fff9e6;"><h3>Change Master Admin Password</h3><div class="input-group"><label for="currentMasterPassword">Current Master Password:</label><input type="password" id="currentMasterPassword"></div><div class="input-group"><label for="newMasterPassword">New Master Password:</label><input type="password" id="newMasterPassword"></div><div class="input-group"><label for="confirmNewMasterPassword">Confirm New Password:</label><input type="password" id="confirmNewMasterPassword"></div><button id="submitChangeMasterPassBtn">Change Password</button><button id="cancelChangeMasterPassBtn" class="secondary">Cancel</button><p id="changeMasterPassError" class="error-message"></p><p id="changeMasterPassSuccess" class="success-message"></p></div><div class="manager-schedule-preview"><h3 id="managerSchedulePreviewTitle">Shift Schedule Preview: Week of [Date]</h3><table id="managerSchedulePreviewTable"><thead><tr><th>Day</th><th>9:30 - 13:00</th><th>13:00 - 16:30</th></tr></thead><tbody></tbody></table></div><div class="manager-main-flex-row"><div class="manager-applications-column"><h3>Shift Applications Management</h3><p style="text-align:center; font-size:0.9em;" id="managerApplicationWeekDisplay"></p><table id="managerShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time</th><th>Status</th><th>Applicants / Assigned</th><th>Actions</th></tr></thead><tbody></tbody></table></div><div class="manager-hours-column"><h3>Hours Overview</h3><div class="input-group" style="margin-bottom:5px;"><select id="hoursViewTypeSelect"><option value="weekly">Weekly Hours</option><option value="monthly">Monthly Hours</option></select></div><div id="hoursOverviewList"></div></div></div><h3>Manage Coworkers</h3><div class="input-group"><label for="newCoworkerName">Add Name:</label><input type="text" id="newCoworkerName" placeholder="Coworker's name"><label for="newCoworkerPassword" style="margin-top:5px;">Set Password:</label><input type="password" id="newCoworkerPassword" placeholder="Initial password"><label style="margin-top:5px;"><input type="checkbox" id="newCoworkerIsManager"> Is Manager?</label><button id="addCoworkerBtn" style="margin-top:10px;">Add Coworker</button></div><div id="coworkerList"></div><div id="totalHoursSummarySection" class="container"><h3>Total Hours Summary per Coworker</h3><div class="input-group"><label for="totalHoursPeriodSelect" style="display:inline-block; margin-right:10px;">Select Period:</label><select id="totalHoursPeriodSelect"><option value="viewing_week">Currently Viewed Week</option><option value="viewing_month">Currently Viewed Month</option><option value="all_loaded">All Loaded Data</option></select></div><table id="totalHoursSummaryTable"><thead><tr><th>Coworker</th><th>Total Approved Hours</th></tr></thead><tbody></tbody></table></div></div></div></div>
+        <div id="managerDashboardView" class="manager-dashboard hidden">
+            <div class="manager-top-bar"><h1>Manager Dashboard</h1><div><span id="managerLoggedInAs" style="margin-right:20px;"></span><button id="switchToUserViewBtn" class="secondary small-action">My Shifts View</button><button id="managerDashboardLogoutBtn" class="secondary small-action">Logout</button></div></div>
+            <div class="manager-body">
+                <div class="manager-sidebar"><h4>Week Navigation</h4><div class="week-navigation"><button id="prevWeekBtnMgr" class="small-action">« Prev Wk</button><button id="jumpToTargetWeekBtnMgr" class="small-action">Next Wk</button><button id="nextWeekBtnMgr" class="small-action">Further Wk »</button></div><p style="text-align:center; font-size:0.9em; margin-bottom:5px;" id="managerSidebarWeekDisplay"></p><hr><h4>Week Actions</h4><button id="publishWeekBtn" class="publish small-action" style="width:100%; margin-bottom:5px;">Publish Week</button><div id="publishStatusIndicator" class="published-status-indicator">Status: Not Published</div><hr><h4>Admin Settings</h4><button id="showChangeMasterPassBtn" class="secondary small-action" style="width:100%; margin-bottom:10px;">Change Master Password</button><button id="resetAllDataBtn" class="delete small-action" style="width:100%;">Reset All Data</button></div>
+                <div class="manager-main-content">
+                    <div id="changeMasterPasswordSection" class="container hidden" style="border: 1px solid #ffc107; background: #fff9e6;"><h3>Change Master Admin Password</h3><div class="input-group"><label for="currentMasterPassword">Current Master Password:</label><input type="password" id="currentMasterPassword"></div><div class="input-group"><label for="newMasterPassword">New Master Password:</label><input type="password" id="newMasterPassword"></div><div class="input-group"><label for="confirmNewMasterPassword">Confirm New Password:</label><input type="password" id="confirmNewMasterPassword"></div><button id="submitChangeMasterPassBtn">Change Password</button><button id="cancelChangeMasterPassBtn" class="secondary">Cancel</button><p id="changeMasterPassError" class="error-message"></p><p id="changeMasterPassSuccess" class="success-message"></p></div>
+                    
+                    <!-- Add New Shift Section -->
+                    <div class="add-shift-section container">
+                        <h3>Add New Shift to Current Week</h3>
+                        <div class="input-group" style="display: flex; align-items: center;">
+                            <label for="addShiftDaySelect" style="margin-right: 5px;">Day:</label>
+                            <select id="addShiftDaySelect">
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                            </select>
+                            <label for="addShiftTimeSelect" style="margin-left:15px; margin-right: 5px;">Time:</label>
+                            <select id="addShiftTimeSelect">
+                                <option value="9:30 - 13:00">9:30 - 13:00</option>
+                                <option value="13:00 - 16:30">13:00 - 16:30</option>
+                            </select>
+                            <button id="managerAddShiftBtn" style="margin-left: 15px;">Add Shift</button>
+                        </div>
+                    </div>
+                    <!-- End Add New Shift Section -->
+
+                    <div class="manager-schedule-preview"><h3 id="managerSchedulePreviewTitle">Shift Schedule Preview: Week of [Date]</h3><table id="managerSchedulePreviewTable"><thead><tr><th>Day</th><th>9:30 - 13:00</th><th>13:00 - 16:30</th></tr></thead><tbody></tbody></table></div>
+                    <div class="manager-main-flex-row">
+                        <div class="manager-applications-column"><h3>Shift Applications Management</h3><p style="text-align:center; font-size:0.9em;" id="managerApplicationWeekDisplay"></p><table id="managerShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time</th><th>Status</th><th>Applicants / Assigned</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+                        <div class="manager-hours-column"><h3>Hours Overview</h3><div class="input-group" style="margin-bottom:5px;"><select id="hoursViewTypeSelect"><option value="weekly">Weekly Hours</option><option value="monthly">Monthly Hours</option></select></div><div id="hoursOverviewList"></div></div>
+                    </div>
+                    <h3>Manage Coworkers</h3><div class="input-group"><label for="newCoworkerName">Add Name:</label><input type="text" id="newCoworkerName" placeholder="Coworker's name"><label for="newCoworkerPassword" style="margin-top:5px;">Set Password:</label><input type="password" id="newCoworkerPassword" placeholder="Initial password"><label style="margin-top:5px;"><input type="checkbox" id="newCoworkerIsManager"> Is Manager?</label><button id="addCoworkerBtn" style="margin-top:10px;">Add Coworker</button></div><div id="coworkerList"></div>
+                    <div id="totalHoursSummarySection" class="container"><h3>Total Hours Summary per Coworker</h3><div class="input-group"><label for="totalHoursPeriodSelect" style="display:inline-block; margin-right:10px;">Select Period:</label><select id="totalHoursPeriodSelect"><option value="viewing_week">Currently Viewed Week</option><option value="viewing_month">Currently Viewed Month</option><option value="all_loaded">All Loaded Data</option></select></div><table id="totalHoursSummaryTable"><thead><tr><th>Coworker</th><th>Total Approved Hours</th></tr></thead><tbody></tbody></table></div>
+                </div>
+            </div>
+        </div>
         <div id="managerUnlockModal" class="hidden" style="position:fixed; top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center;"><div style="background:white; padding:30px; border-radius:8px; box-shadow: 0 0 15px rgba(0,0,0,0.3); text-align:center;"><h3>Manager Panel Access</h3><p>Enter Master Admin Password:</p><input type="password" id="masterManagerPasswordInput" style="padding:10px; margin-bottom:15px; width:200px;"><br><button id="unlockManagerPanelBtn">Unlock</button><button id="cancelManagerUnlockBtn" class="secondary">Cancel</button><p id="managerUnlockError" class="error-message"></p></div></div>
     </div>
 
@@ -131,7 +163,6 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- SCRIPT CONSTANTS AND VARIABLES START HERE ---
         const DEFAULT_MASTER_PASSWORD = "superadmin";
         const ACTIVE_SESSION_USER_KEY = "activeShiftUser_v7_firebase_cached";
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -149,7 +180,6 @@
         let currentPastShiftViewDate;
         let currentUserApplicationViewingDate; 
 
-        // DOM Elements
         const initialLoginViewWrapper = document.getElementById('initialLoginViewWrapper');
         const loginUserSelect = document.getElementById('loginUserSelect');
         const loginPasswordInput = document.getElementById('loginPassword');
@@ -163,18 +193,15 @@
         const accessManagerPanelBtn = document.getElementById('accessManagerPanelBtn');
         const userLogoutBtn = document.getElementById('userLogoutBtn');
         const userShiftsTableBody = document.getElementById('userShiftsTable').getElementsByTagName('tbody')[0];
-        
         const prevUserAppWeekBtn = document.getElementById('prevUserAppWeekBtn');
         const currentUserAppWeekDisplay = document.getElementById('currentUserAppWeekDisplay');
         const nextUserAppWeekBtn = document.getElementById('nextUserAppWeekBtn');
-
         const myPastShiftsSection = document.getElementById('myPastShiftsSection');
         const prevPastPeriodBtn = document.getElementById('prevPastPeriodBtn');
         const pastShiftsViewTypeSelect = document.getElementById('pastShiftsViewTypeSelect');
         const nextPastPeriodBtn = document.getElementById('nextPastPeriodBtn');
         const myPastShiftsPeriodDisplay = document.getElementById('myPastShiftsPeriodDisplay');
         const myPastShiftsTableBody = document.getElementById('myPastShiftsTable').getElementsByTagName('tbody')[0];
-
         const managerUnlockModal = document.getElementById('managerUnlockModal');
         const masterManagerPasswordInput = document.getElementById('masterManagerPasswordInput');
         const unlockManagerPanelBtn = document.getElementById('unlockManagerPanelBtn');
@@ -213,11 +240,18 @@
         const coworkerListDiv = document.getElementById('coworkerList');
         const totalHoursPeriodSelect = document.getElementById('totalHoursPeriodSelect');
         const totalHoursSummaryTableBody = document.getElementById('totalHoursSummaryTable').getElementsByTagName('tbody')[0];
+        // DOM for Add Shift section
+        const addShiftDaySelect = document.getElementById('addShiftDaySelect');
+        const addShiftTimeSelect = document.getElementById('addShiftTimeSelect');
+        const managerAddShiftBtn = document.getElementById('managerAddShiftBtn');
+
 
         function getMondayOfDate(d) { d = new Date(d); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); monday.setHours(0,0,0,0); return monday; }
         function getNextWeekStartDate(fromDate) { const baseDate = fromDate ? new Date(fromDate) : new Date(); const monday = getMondayOfDate(baseDate); monday.setDate(monday.getDate() + 7); return monday; }
         function formatDate(dateObj, includeDayName = true) { if (!dateObj || !(dateObj instanceof Date) || isNaN(dateObj.getTime())) return 'Invalid Date'; const dayStr = includeDayName ? `${dayNames[dateObj.getDay()]}, ` : ''; return `${dayStr}${dateObj.toLocaleString('default', { month: 'short' })} ${dateObj.getDate()}, ${dateObj.getFullYear()}`; }
         function getWeekKey(dateObj) { return getMondayOfDate(dateObj).toISOString().split('T')[0]; }
+        // Helper for Add Shift: Calculate the specific date for a day in the current manager viewing week
+        function getDateForDayInWeek(targetDayName, weekStartDate) { const monday = getMondayOfDate(new Date(weekStartDate)); const dayIndex = workDays.indexOf(targetDayName); if (dayIndex === -1) return null; const shiftSpecificDate = new Date(monday); shiftSpecificDate.setDate(monday.getDate() + dayIndex); return shiftSpecificDate.toISOString(); }
 
         async function initializeApp() { try { await loadMasterPassword(); currentViewingDateMgr = getNextWeekStartDate(); currentPastShiftViewDate = getMondayOfDate(new Date()); currentUserApplicationViewingDate = getNextWeekStartDate(); await initializeCoworkers(); populateLoginUserDropdown(); checkActiveSession(); } catch (error) { console.error("Error during app initialization:", error); if(initialLoginError) initialLoginError.textContent = "Failed to initialize. Check console for details."; } }
         async function loadMasterPassword() { try { const configRef = db.collection('config').doc('adminConfig'); const doc = await configRef.get(); if (doc.exists && doc.data().masterAdminPassword) { currentMasterPassword = doc.data().masterAdminPassword; } else { currentMasterPassword = DEFAULT_MASTER_PASSWORD; try { await configRef.set({ masterAdminPassword: DEFAULT_MASTER_PASSWORD }, { merge: true }); } catch (setConfigError) { console.error("Could not save default master password:", setConfigError); } } } catch (error) { console.error("Error loading master password:", error); currentMasterPassword = DEFAULT_MASTER_PASSWORD; } }
@@ -231,13 +265,89 @@
         function handleAccessManagerPanel() { if (loggedInCoworker && loggedInCoworker.isManager) { managerUnlockModal.classList.remove('hidden'); masterManagerPasswordInput.value = ""; managerUnlockError.textContent = ""; masterManagerPasswordInput.focus(); } }
         function handleUnlockManagerPanel() { if (masterManagerPasswordInput.value === currentMasterPassword) { isManagerModeActive = true; managerUnlockModal.classList.add('hidden'); showCorrectView(); } else { managerUnlockError.textContent = "Incorrect Master Password."; } }
         function logout() { loggedInCoworker = null; isManagerModeActive = false; localStorage.removeItem(ACTIVE_SESSION_USER_KEY); loginPasswordInput.value = ""; masterManagerPasswordInput.value = ""; initialLoginError.textContent = ""; managerUnlockError.textContent = ""; changeMasterPasswordSection.classList.add('hidden'); showCorrectView(); }
-
         async function prepareUserView() { if (!loggedInCoworker) return; welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`; accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager); if (myPastShiftsSection) { myPastShiftsSection.classList.remove('hidden'); await renderMyPastShifts(); } try { const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get(); if (!querySnapshot.empty) { const latestPublishedWeekKey = querySnapshot.docs[0].id; let latestPublishedWeekData; const weekDocRef = db.collection('shifts').doc(latestPublishedWeekKey); const doc = await weekDocRef.get(); if (doc.exists) { latestPublishedWeekData = doc.data(); if (typeof latestPublishedWeekData !== 'object' || latestPublishedWeekData === null) latestPublishedWeekData = {}; if (!Array.isArray(latestPublishedWeekData.shifts)) { latestPublishedWeekData.shifts = []; } if (typeof latestPublishedWeekData.isPublished !== 'boolean') { latestPublishedWeekData.isPublished = (doc.data() && typeof doc.data().isPublished === 'boolean') ? doc.data().isPublished : false; } latestPublishedWeekData.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; }); allShiftsData[latestPublishedWeekKey] = JSON.parse(JSON.stringify(latestPublishedWeekData)); if (latestPublishedWeekData.shifts) { latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`; renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody); latestPublishedScheduleSection.classList.remove('hidden'); } else { if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } } else { if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } } else { if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } if (!currentUserApplicationViewingDate) { currentUserApplicationViewingDate = getNextWeekStartDate(); } await renderCurrentUserApplicationWeek(); } catch (error) { console.error("Error preparing user view (outer try-catch):", error); if(currentUserAppWeekDisplay) currentUserAppWeekDisplay.textContent = "Error loading shifts."; if(latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } }
         async function renderCurrentUserApplicationWeek() { if (!loggedInCoworker || !currentUserApplicationViewingDate) return; const firstAllowedAppDate = getNextWeekStartDate(); const lastAllowedAppDate = new Date(firstAllowedAppDate); lastAllowedAppDate.setDate(firstAllowedAppDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7)); if (currentUserAppWeekDisplay) { currentUserAppWeekDisplay.textContent = `Application Week: ${formatDate(currentUserApplicationViewingDate, false)}`; } const weekData = await getShiftsForWeek(currentUserApplicationViewingDate); if (weekData.error) { if(userShiftsTableBody) userShiftsTableBody.innerHTML = '<tr><td colspan="6">Error loading shifts.</td></tr>'; } else if (weekData.shifts) { renderUserShifts(weekData.shifts, currentUserApplicationViewingDate); } else { if(userShiftsTableBody) userShiftsTableBody.innerHTML = '<tr><td colspan="6">No shifts available for this week.</td></tr>'; } if (prevUserAppWeekBtn) { prevUserAppWeekBtn.disabled = currentUserApplicationViewingDate.getTime() <= firstAllowedAppDate.getTime(); } if (nextUserAppWeekBtn) { nextUserAppWeekBtn.disabled = getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() >= getMondayOfDate(new Date(lastAllowedAppDate)).getTime(); } }
         function renderUserShifts(shiftsForWeek, forWeekDate) { userShiftsTableBody.innerHTML = ""; if (!shiftsForWeek || !Array.isArray(shiftsForWeek)) { userShiftsTableBody.innerHTML = '<tr><td colspan="6">Error: Could not load shifts.</td></tr>'; return; } shiftsForWeek.forEach(shift => { const row = userShiftsTableBody.insertRow(); row.insertCell().textContent = shift.day; row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.time; const statusCell = row.insertCell(); const applicantsAssignedCell = row.insertCell(); const actionCell = row.insertCell(); const isMyAppPending = shift.status === 'pending' && Array.isArray(shift.applicants) && shift.applicants.includes(loggedInCoworker.name); const isApproved = shift.status === 'approved'; if (isApproved) { statusCell.textContent = "Approved"; statusCell.className = 'status-approved'; applicantsAssignedCell.textContent = shift.applicantName; actionCell.textContent = "---"; } else if (isMyAppPending) { statusCell.textContent = "Pending"; statusCell.className = 'status-pending'; applicantsAssignedCell.textContent = loggedInCoworker.name; const cancelBtn = document.createElement('button'); cancelBtn.textContent = "Cancel App"; cancelBtn.classList.add("deny"); cancelBtn.onclick = () => cancelApplication(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(cancelBtn); } else { statusCell.textContent = "Available"; statusCell.className = 'status-available'; applicantsAssignedCell.textContent = "---"; const applyButton = document.createElement('button'); applyButton.textContent = "Apply"; applyButton.classList.add("apply"); applyButton.onclick = () => applyForShift(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(applyButton); } }); }
         function renderScheduleOverview(shiftsForWeek, tableBodyElement) { tableBodyElement.innerHTML = ""; if (!shiftsForWeek || !Array.isArray(shiftsForWeek)) { tableBodyElement.innerHTML = '<tr><td colspan="3">Error: Could not load schedule.</td></tr>'; return; } const scheduleData = {}; workDays.forEach(day => { scheduleData[day] = {}; shiftTimes.forEach(time => scheduleData[day][time] = "Unassigned"); }); shiftsForWeek.filter(s => s.status === "approved").forEach(shift => { if (scheduleData[shift.day]) scheduleData[shift.day][shift.time] = shift.applicantName; }); workDays.forEach(day => { const row = tableBodyElement.insertRow(); const dayCell = row.insertCell(); const shiftOnThisDay = shiftsForWeek.find(s => s.day === day); dayCell.innerHTML = `${day}<br><small>${shiftOnThisDay ? formatDate(new Date(shiftOnThisDay.date), false) : ''}</small>`; shiftTimes.forEach(time => { const cell = row.insertCell(); cell.textContent = scheduleData[day][time] || "Unassigned"; if (scheduleData[day][time] && scheduleData[day][time] !== "Unassigned") { cell.style.fontWeight = "bold"; } }); }); }
         async function refreshManagerDashboard() { if (!isManagerModeActive) return; try { const weekData = await getWeekData(currentViewingDateMgr); if (weekData.error || !weekData.shifts) { managerSidebarWeekDisplay.textContent = "Error loading week."; managerApplicationWeekDisplay.textContent = "Error loading apps."; managerSchedulePreviewTitle.textContent = "Error loading schedule."; if(managerShiftsTableBody) managerShiftsTableBody.innerHTML = '<tr><td colspan="6">Error loading shifts.</td></tr>'; if(managerSchedulePreviewTableBody) managerSchedulePreviewTableBody.innerHTML = '<tr><td colspan="3">Error loading preview.</td></tr>'; if(hoursOverviewList) hoursOverviewList.innerHTML = "<p>Error loading hours.</p>"; return; } const shiftsForViewingWeek = weekData.shifts; managerSidebarWeekDisplay.textContent = `Week: ${formatDate(currentViewingDateMgr, false)}`; managerApplicationWeekDisplay.textContent = `Apps for week: ${formatDate(currentViewingDateMgr, false)}`; managerSchedulePreviewTitle.textContent = `Schedule: Week of ${formatDate(currentViewingDateMgr, false)}`; renderManagerApplications(shiftsForViewingWeek); renderScheduleOverview(shiftsForViewingWeek, managerSchedulePreviewTableBody); renderCoworkerListForManager(); renderHoursOverview(shiftsForViewingWeek); await renderTotalHoursSummary(); if (weekData.isPublished) { publishWeekBtn.textContent = "Unpublish Week"; publishWeekBtn.classList.remove("publish"); publishWeekBtn.classList.add("deny"); publishStatusIndicator.textContent = "Status: Published"; publishStatusIndicator.style.color = "green"; } else { publishWeekBtn.textContent = "Publish Week"; publishWeekBtn.classList.add("publish"); publishWeekBtn.classList.remove("deny"); publishStatusIndicator.textContent = "Status: Not Published"; publishStatusIndicator.style.color = "orange"; } } catch (error) { console.error("Error refreshing manager dashboard:", error); } }
-        function renderManagerApplications(shiftsForWeek) { managerShiftsTableBody.innerHTML = ""; if (!shiftsForWeek || !Array.isArray(shiftsForWeek)) { managerShiftsTableBody.innerHTML = '<tr><td colspan="6">Error: Could not load applications.</td></tr>'; return; } shiftsForWeek.forEach(shift => { const row = managerShiftsTableBody.insertRow(); row.insertCell().textContent = shift.day; row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.time; const statusCell = row.insertCell(); statusCell.textContent = shift.status.charAt(0).toUpperCase() + shift.status.slice(1); statusCell.className = `status-${shift.status}`; let applicantDisplay = "---"; if (shift.status === "pending" && Array.isArray(shift.applicants) && shift.applicants.length > 0) { applicantDisplay = shift.applicants.join(', '); } else if (shift.status === "approved") { applicantDisplay = shift.applicantName; } row.insertCell().textContent = applicantDisplay; const actionCell = row.insertCell(); actionCell.classList.add("action-cell"); const weekKey = getWeekKey(new Date(shift.date)); if (shift.status === "pending" && Array.isArray(shift.applicants) && shift.applicants.length > 0) { const applicantSelect = document.createElement('select'); applicantSelect.id = `select-pending-${shift.id}`; shift.applicants.forEach(appName => { const option = document.createElement('option'); option.value = appName; option.textContent = appName; applicantSelect.appendChild(option); }); actionCell.appendChild(applicantSelect); const approveSelectedBtn = document.createElement('button'); approveSelectedBtn.textContent = "Approve Sel."; approveSelectedBtn.classList.add("approve", "small-action"); approveSelectedBtn.onclick = () => { const selectedName = document.getElementById(`select-pending-${shift.id}`).value; managerApproveSelectedApplicant(shift.id, weekKey, selectedName); }; actionCell.appendChild(approveSelectedBtn); const denyAllBtn = document.createElement('button'); denyAllBtn.textContent = "Deny All"; denyAllBtn.classList.add("deny", "small-action"); denyAllBtn.style.marginLeft = "5px"; denyAllBtn.onclick = () => managerDenyAllApplicants(shift.id, weekKey); actionCell.appendChild(denyAllBtn); } else if (shift.status === "approved") { const clearBtn = document.createElement('button'); clearBtn.textContent = "Clear"; clearBtn.classList.add("deny", "small-action"); clearBtn.onclick = () => managerClearApprovedShift(shift.id, weekKey); actionCell.appendChild(clearBtn); actionCell.appendChild(document.createElement('hr')); } if (shift.status === "available" || shift.status === "approved") { const manualAssignSelect = document.createElement('select'); manualAssignSelect.id = `select-manual-${shift.id}`; manualAssignSelect.innerHTML = '<option value="">-- Assign To --</option>'; coworkers.forEach(cw => { const option = document.createElement('option'); option.value = cw.name; option.textContent = cw.name; manualAssignSelect.appendChild(option); }); actionCell.appendChild(manualAssignSelect); const manualAssignBtn = document.createElement('button'); manualAssignBtn.textContent = "Assign"; manualAssignBtn.classList.add("assign", "small-action"); manualAssignBtn.onclick = () => { const selectedName = document.getElementById(`select-manual-${shift.id}`).value; if (selectedName) { managerManuallyAssignShift(shift.id, weekKey, selectedName); } else { alert("Please select a coworker to assign."); } }; actionCell.appendChild(manualAssignBtn); } }); }
+        
+        // --- MODIFIED renderManagerApplications to include delete buttons ---
+        function renderManagerApplications(shiftsForWeek) {
+            managerShiftsTableBody.innerHTML = "";
+            if (!shiftsForWeek || !Array.isArray(shiftsForWeek)) {
+                managerShiftsTableBody.innerHTML = '<tr><td colspan="6">Error: Could not load applications.</td></tr>';
+                return;
+            }
+            shiftsForWeek.forEach(shift => {
+                const row = managerShiftsTableBody.insertRow();
+                row.insertCell().textContent = shift.day;
+                row.insertCell().textContent = formatDate(new Date(shift.date), false);
+                row.insertCell().textContent = shift.time;
+                const statusCell = row.insertCell();
+                statusCell.textContent = shift.status.charAt(0).toUpperCase() + shift.status.slice(1);
+                statusCell.className = `status-${shift.status}`;
+                let applicantDisplay = "---";
+                if (shift.status === "pending" && Array.isArray(shift.applicants) && shift.applicants.length > 0) {
+                    applicantDisplay = shift.applicants.join(', ');
+                } else if (shift.status === "approved") {
+                    applicantDisplay = shift.applicantName;
+                }
+                row.insertCell().textContent = applicantDisplay;
+                const actionCell = row.insertCell();
+                actionCell.classList.add("action-cell");
+                const weekKey = getWeekKey(new Date(shift.date));
+
+                // Actions for pending shifts
+                if (shift.status === "pending" && Array.isArray(shift.applicants) && shift.applicants.length > 0) {
+                    const applicantSelect = document.createElement('select');
+                    applicantSelect.id = `select-pending-${shift.id}`;
+                    shift.applicants.forEach(appName => { const option = document.createElement('option'); option.value = appName; option.textContent = appName; applicantSelect.appendChild(option); });
+                    actionCell.appendChild(applicantSelect);
+                    const approveSelectedBtn = document.createElement('button');
+                    approveSelectedBtn.textContent = "Approve Sel.";
+                    approveSelectedBtn.classList.add("approve", "small-action");
+                    approveSelectedBtn.onclick = () => { const selectedName = document.getElementById(`select-pending-${shift.id}`).value; managerApproveSelectedApplicant(shift.id, weekKey, selectedName); };
+                    actionCell.appendChild(approveSelectedBtn);
+                    const denyAllBtn = document.createElement('button');
+                    denyAllBtn.textContent = "Deny All";
+                    denyAllBtn.classList.add("deny", "small-action");
+                    denyAllBtn.style.marginLeft = "5px";
+                    denyAllBtn.onclick = () => managerDenyAllApplicants(shift.id, weekKey);
+                    actionCell.appendChild(denyAllBtn);
+                } else if (shift.status === "approved") { // Action for approved shifts
+                    const clearBtn = document.createElement('button');
+                    clearBtn.textContent = "Clear Assign";
+                    clearBtn.classList.add("deny", "small-action");
+                    clearBtn.onclick = () => managerClearApprovedShift(shift.id, weekKey);
+                    actionCell.appendChild(clearBtn);
+                }
+
+                // Manual assignment (available for 'available' or 'approved' shifts - allows re-assignment)
+                if (shift.status === "available" || shift.status === "approved") {
+                    if (shift.status === "approved") actionCell.appendChild(document.createElement('hr')); // Separator if already approved
+                    const manualAssignSelect = document.createElement('select');
+                    manualAssignSelect.id = `select-manual-${shift.id}`;
+                    manualAssignSelect.innerHTML = '<option value="">-- Assign To --</option>';
+                    coworkers.forEach(cw => { const option = document.createElement('option'); option.value = cw.name; option.textContent = cw.name; manualAssignSelect.appendChild(option); });
+                    actionCell.appendChild(manualAssignSelect);
+                    const manualAssignBtn = document.createElement('button');
+                    manualAssignBtn.textContent = "Assign";
+                    manualAssignBtn.classList.add("assign", "small-action");
+                    manualAssignBtn.onclick = () => { const selectedName = document.getElementById(`select-manual-${shift.id}`).value; if (selectedName) { managerManuallyAssignShift(shift.id, weekKey, selectedName); } else { alert("Please select a coworker to assign."); } };
+                    actionCell.appendChild(manualAssignBtn);
+                }
+                
+                // Delete Shift Button for ALL shifts
+                if (actionCell.childNodes.length > 0) actionCell.appendChild(document.createElement('hr')); // Separator
+                const deleteShiftBtn = document.createElement('button');
+                deleteShiftBtn.textContent = "Delete Shift";
+                deleteShiftBtn.classList.add("delete", "small-action");
+                deleteShiftBtn.style.marginTop = "5px";
+                deleteShiftBtn.onclick = () => managerDeleteShift(shift.id, weekKey);
+                actionCell.appendChild(deleteShiftBtn);
+            });
+        }
+
         function renderHoursOverview(shiftsForViewingWeek) { hoursOverviewList.innerHTML = ""; if (!shiftsForViewingWeek || !Array.isArray(shiftsForViewingWeek)) { hoursOverviewList.innerHTML = "<p>Could not load hours.</p>"; return; } const type = hoursViewTypeSelect.value; const hoursData = {}; coworkers.forEach(c => hoursData[c.name] = 0); if (type === "weekly") { shiftsForViewingWeek.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (hoursData.hasOwnProperty(s.applicantName)) { hoursData[s.applicantName] += SHIFT_DURATION_HOURS; } }); } else if (type === "monthly") { const targetMonth = currentViewingDateMgr.getMonth(); const targetYear = currentViewingDateMgr.getFullYear(); for (const weekKey in allShiftsData) { const weekStartDate = new Date(weekKey); if (weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear && allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { allShiftsData[weekKey].shifts.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (hoursData.hasOwnProperty(s.applicantName)) { hoursData[s.applicantName] += SHIFT_DURATION_HOURS; } }); } } } const sortedCoworkers = Object.keys(hoursData).sort(); sortedCoworkers.forEach(name => { const item = document.createElement('div'); item.classList.add('hours-overview-item'); item.textContent = `${name}: ${hoursData[name].toFixed(1)} hrs`; hoursOverviewList.appendChild(item); }); }
         async function renderMyPastShifts() { if (!loggedInCoworker) { if (myPastShiftsSection) myPastShiftsSection.classList.add('hidden'); return; } if (!myPastShiftsSection) { return; } myPastShiftsSection.classList.remove('hidden'); const viewType = pastShiftsViewTypeSelect.value; myPastShiftsTableBody.innerHTML = ""; let periodStart, periodEnd, displayPeriodString = ""; if (viewType === "weekly") { periodStart = getMondayOfDate(new Date(currentPastShiftViewDate)); periodEnd = new Date(periodStart); periodEnd.setDate(periodStart.getDate() + 6); periodEnd.setHours(23, 59, 59, 999); displayPeriodString = `Week of ${formatDate(periodStart, false)}`; } else { periodStart = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth(), 1); periodEnd = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth() + 1, 0); periodEnd.setHours(23, 59, 59, 999); displayPeriodString = `${periodStart.toLocaleString('default', { month: 'long' })} ${periodStart.getFullYear()}`; } myPastShiftsPeriodDisplay.textContent = displayPeriodString; const userPastShifts = []; try { for (const weekKey in allShiftsData) { const weekData = allShiftsData[weekKey]; if (weekData && Array.isArray(weekData.shifts)) { weekData.shifts.forEach(shift => { const shiftDate = new Date(shift.date); if ( shift.status === 'approved' && shift.applicantName === loggedInCoworker.name && shiftDate >= periodStart && shiftDate <= periodEnd ) { userPastShifts.push(shift); } }); } } } catch (error) { myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">Error loading past shifts.</td></tr>`; return; } if (userPastShifts.length === 0) { myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">No approved shifts found.</td></tr>`; return; } userPastShifts.sort((a, b) => new Date(a.date) - new Date(b.date)); userPastShifts.forEach(shift => { const row = myPastShiftsTableBody.insertRow(); row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.day; row.insertCell().textContent = shift.time; }); }
         async function renderTotalHoursSummary() { totalHoursSummaryTableBody.innerHTML = ""; const period = totalHoursPeriodSelect.value; const summaryData = {}; coworkers.forEach(c => summaryData[c.name] = 0); let shiftsToConsider = []; if (period === "viewing_week") { const weekData = await getShiftsForWeek(currentViewingDateMgr); if (weekData && Array.isArray(weekData.shifts)) shiftsToConsider = weekData.shifts; } else if (period === "viewing_month") { const targetMonth = currentViewingDateMgr.getMonth(); const targetYear = currentViewingDateMgr.getFullYear(); for (const weekKey in allShiftsData) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { const weekStartDate = new Date(weekKey); if(weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear) { shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts); } } } } else if (period === "all_loaded") { for (const weekKey in allShiftsData) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts); } } } shiftsToConsider.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (summaryData.hasOwnProperty(s.applicantName)) { summaryData[s.applicantName] += SHIFT_DURATION_HOURS; } }); const sortedCoworkerNames = Object.keys(summaryData).sort(); sortedCoworkerNames.forEach(name => { const row = totalHoursSummaryTableBody.insertRow(); row.insertCell().textContent = name; row.insertCell().textContent = summaryData[name].toFixed(1) + " hrs"; }); }
@@ -248,9 +358,106 @@
         async function managerClearApprovedShift(shiftId, weekKey) { const weekDocRef = db.collection('shifts').doc(weekKey); try { await db.runTransaction(async (transaction) => { const weekDoc = await transaction.get(weekDocRef); if (!weekDoc.exists) throw "Shift data not found!"; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data."; const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId); if (shiftIndex === -1) throw "Shift not found!"; if (weekData.shifts[shiftIndex].status !== 'approved') { alert("Shift not approved."); return; } weekData.shifts[shiftIndex].status = "available"; weekData.shifts[shiftIndex].applicantName = ""; weekData.shifts[shiftIndex].applicants = []; transaction.update(weekDocRef, { shifts: weekData.shifts }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); }); await refreshManagerDashboard(); await prepareUserView(); } catch (error) { console.error("Error clearing shift:", error); alert("Failed to clear: " + error); } }
         async function managerManuallyAssignShift(shiftId, weekKey, coworkerName) { if (!coworkerName) { alert("Select coworker."); return; } const weekDocRef = db.collection('shifts').doc(weekKey); try { await db.runTransaction(async (transaction) => { const weekDoc = await transaction.get(weekDocRef); if (!weekDoc.exists) throw "Shift data not found!"; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data."; const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId); if (shiftIndex === -1) throw "Shift not found!"; weekData.shifts[shiftIndex].status = "approved"; weekData.shifts[shiftIndex].applicantName = coworkerName; weekData.shifts[shiftIndex].applicants = []; transaction.update(weekDocRef, { shifts: weekData.shifts }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); }); await refreshManagerDashboard(); await prepareUserView(); } catch (error) { console.error("Error assigning shift:", error); alert("Failed to assign: " + error); } }
         async function handlePublishWeekToggle() { const weekKeyToPublish = getWeekKey(currentViewingDateMgr); const weekDocRefToPublish = db.collection('shifts').doc(weekKeyToPublish); try { const docToPublish = await weekDocRefToPublish.get(); if (!docToPublish.exists) { alert("Cannot publish a non-existent week."); return; } const dataToPublish = docToPublish.data(); if (!dataToPublish || typeof dataToPublish.isPublished !== 'boolean') { alert("Week data invalid."); return; } if (dataToPublish.isPublished) { if (confirm(`Unpublish week of ${formatDate(currentViewingDateMgr, false)}?`)) { await weekDocRefToPublish.update({ isPublished: false }); if (allShiftsData[weekKeyToPublish]) { allShiftsData[weekKeyToPublish].isPublished = false; } alert(`Week of ${formatDate(currentViewingDateMgr, false)} Unpublished.`); } else { return; } } else { const publishedWeeksQuery = db.collection('shifts').where('isPublished', '==', true); const snapshot = await publishedWeeksQuery.get(); let previouslyPublishedWeekKey = null; let previouslyPublishedWeekDocRef = null; snapshot.forEach(doc => { if (doc.id !== weekKeyToPublish) { previouslyPublishedWeekKey = doc.id; previouslyPublishedWeekDocRef = doc.ref; } }); let doPublishCurrentWeek = true; if (previouslyPublishedWeekKey) { const confirmUnpublishOld = confirm( `Week of ${formatDate(new Date(weekKeyToPublish), false)} is about to be published.\n` + `The week of ${formatDate(new Date(previouslyPublishedWeekKey), false)} is currently published.\n\n` + `Unpublish the week of ${formatDate(new Date(previouslyPublishedWeekKey), false)} first?` ); if (confirmUnpublishOld) { await previouslyPublishedWeekDocRef.update({ isPublished: false }); if (allShiftsData[previouslyPublishedWeekKey]) { allShiftsData[previouslyPublishedWeekKey].isPublished = false; } } } else { if (!confirm(`Publish week of ${formatDate(currentViewingDateMgr, false)}?`)) { doPublishCurrentWeek = false; } } if (doPublishCurrentWeek) { await weekDocRefToPublish.update({ isPublished: true }); if (allShiftsData[weekKeyToPublish]) { allShiftsData[weekKeyToPublish].isPublished = true; } else { const freshData = (await weekDocRefToPublish.get()).data(); if (freshData) { freshData.isPublished = true; allShiftsData[weekKeyToPublish] = JSON.parse(JSON.stringify(freshData)); } } alert(`Week of ${formatDate(currentViewingDateMgr, false)} Published.`); } } await refreshManagerDashboard(); await prepareUserView(); } catch (error) { console.error("Error toggling publish status:", error); alert("Failed to toggle publish status: " + error.message); } }
+        
+        // --- NEW: Manager Add/Delete Shift Functions ---
+        async function managerAddNewShift() {
+            if (!currentViewingDateMgr) { alert("No week selected for adding a shift."); return; }
+            const selectedDay = addShiftDaySelect.value;
+            const selectedTime = addShiftTimeSelect.value;
+            const weekKey = getWeekKey(currentViewingDateMgr);
+            const shiftSpecificDateISO = getDateForDayInWeek(selectedDay, currentViewingDateMgr);
+
+            if (!shiftSpecificDateISO) { alert("Could not determine date for the selected day."); return; }
+
+            const weekDocRef = db.collection('shifts').doc(weekKey);
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const weekDoc = await transaction.get(weekDocRef);
+                    let weekData;
+                    if (!weekDoc.exists) { // Should ideally not happen if viewing the week, but handle defensively
+                        weekData = { shifts: [], isPublished: false };
+                    } else {
+                        weekData = weekDoc.data();
+                        if (!Array.isArray(weekData.shifts)) weekData.shifts = []; // Ensure shifts array exists
+                    }
+
+                    // Check if shift already exists for this day and time
+                    const existingShift = weekData.shifts.find(s => s.day === selectedDay && s.time === selectedTime);
+                    if (existingShift) {
+                        throw new Error(`A shift for ${selectedDay} at ${selectedTime} already exists in this week.`);
+                    }
+
+                    const newShift = {
+                        id: `${weekKey}-${Date.now()}`, // Simple unique ID
+                        day: selectedDay,
+                        date: shiftSpecificDateISO,
+                        time: selectedTime,
+                        status: "available",
+                        applicants: [],
+                        applicantName: ""
+                    };
+                    weekData.shifts.push(newShift);
+                    weekData.shifts.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime() || a.time.localeCompare(b.time)); // Keep shifts sorted
+
+                    if (!weekDoc.exists) {
+                        transaction.set(weekDocRef, weekData);
+                    } else {
+                        transaction.update(weekDocRef, { shifts: weekData.shifts });
+                    }
+                    allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); // Update local cache
+                });
+                alert(`Shift added for ${selectedDay}, ${selectedTime}.`);
+                await refreshManagerDashboard();
+                // No need to call prepareUserView() here as adding a shift doesn't directly affect user's published view
+            } catch (error) {
+                console.error("Error adding new shift:", error);
+                alert("Failed to add shift: " + error.message);
+            }
+        }
+
+        async function managerDeleteShift(shiftId, weekKey) {
+            if (!confirm("Are you sure you want to permanently delete this shift? This action cannot be undone.")) {
+                return;
+            }
+            const weekDocRef = db.collection('shifts').doc(weekKey);
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const weekDoc = await transaction.get(weekDocRef);
+                    if (!weekDoc.exists) throw "Shift data for this week not found!";
+                    const weekData = weekDoc.data();
+                    if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data structure.";
+                    
+                    const initialShiftCount = weekData.shifts.length;
+                    weekData.shifts = weekData.shifts.filter(s => s.id !== shiftId);
+
+                    if (weekData.shifts.length === initialShiftCount) {
+                        // This means the shiftId was not found, possibly already deleted or a bug.
+                        // Alerting is good, but we might not want to throw an error that stops the transaction
+                        // if other valid operations were part of it (though not in this specific case).
+                        console.warn(`Shift with ID ${shiftId} not found in week ${weekKey} during delete transaction. Already deleted?`);
+                        // To prevent an unnecessary update if nothing changed:
+                        // return; // or simply let the transaction proceed to update with the same data.
+                        // For now, let's allow it to proceed, Firestore handles no-op updates efficiently.
+                    }
+                    
+                    transaction.update(weekDocRef, { shifts: weekData.shifts });
+                    if (allShiftsData[weekKey]) { // Update local cache
+                        allShiftsData[weekKey].shifts = weekData.shifts.map(s => JSON.parse(JSON.stringify(s))); // deep copy
+                    }
+                });
+                alert("Shift deleted successfully.");
+                await refreshManagerDashboard();
+                await prepareUserView(); // Refresh user view in case the deleted shift was part of a published schedule
+            } catch (error) {
+                console.error("Error deleting shift:", error);
+                alert("Failed to delete shift: " + error.message);
+            }
+        }
+
+
         function renderCoworkerListForManager() { coworkerListDiv.innerHTML = "<h4>Current Coworkers:</h4>"; if (coworkers.length === 0) { coworkerListDiv.innerHTML += "<p>No coworkers.</p>"; return; } const ul = document.createElement('ul'); ul.style.listStyleType = 'none'; ul.style.paddingLeft = '0'; coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => { const li = document.createElement('li'); li.classList.add('coworker-management-item'); const nameSpan = document.createElement('span'); nameSpan.textContent = `${c.name} ${c.isManager ? '(Mgr)' : ''}`; li.appendChild(nameSpan); const actionDiv = document.createElement('div'); const changePassBtn = document.createElement('button'); changePassBtn.textContent = "Pwd"; changePassBtn.classList.add("secondary", "small-action"); changePassBtn.onclick = () => handleChangeCoworkerPassword(c.id || c.name); actionDiv.appendChild(changePassBtn); const toggleMgrBtn = document.createElement('button'); toggleMgrBtn.textContent = c.isManager ? "Demote" : "Promote"; toggleMgrBtn.classList.add("secondary", "small-action"); toggleMgrBtn.onclick = () => handleToggleManagerStatus(c.id || c.name); actionDiv.appendChild(toggleMgrBtn); const deleteBtn = document.createElement('button'); deleteBtn.textContent = "Del"; deleteBtn.classList.add("delete", "small-action"); deleteBtn.onclick = () => handleDeleteCoworker(c.id || c.name); actionDiv.appendChild(deleteBtn); li.appendChild(actionDiv); ul.appendChild(li); }); coworkerListDiv.appendChild(ul); }
         async function handleAddCoworker() { const name = newCoworkerNameInput.value.trim(); const password = newCoworkerPasswordInput.value; const isManager = newCoworkerIsManagerCheckbox.checked; if (!name || !password) { alert("Name and password required."); return; } if (coworkers.find(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Coworker name already exists."); return; } try { await db.collection('coworkers').doc(name).set({ name, password, isManager }); await initializeCoworkers(); populateLoginUserDropdown(); renderCoworkerListForManager(); newCoworkerNameInput.value = ""; newCoworkerPasswordInput.value = ""; newCoworkerIsManagerCheckbox.checked = false; alert(`${name} added.`); } catch (error) { console.error("Error adding coworker:", error); alert("Failed to add: " + error); } }
-        async function handleDeleteCoworker(coworkerDocIdOrName) { const coworkerToDelete = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName); if (!coworkerToDelete) { alert("Coworker not found."); return;} if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) { alert("Cannot delete the last manager."); return; } if (!confirm(`Delete ${coworkerToDelete.name}?`)) return; try { await db.collection('coworkers').doc(coworkerToDelete.id || coworkerToDelete.name).delete(); const shiftsCollectionRef = db.collection('shifts'); const querySnapshot = await shiftsCollectionRef.get(); const batch = db.batch(); let changesMadeToShifts = false; querySnapshot.forEach(weekDoc => { const weekKey = weekDoc.id; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) return; let weekModified = false; const updatedShifts = weekData.shifts.map(shift => { let shiftChanged = false; if (shift.applicantName === coworkerToDelete.name) { shift.applicantName = ""; shift.status = "available"; shiftChanged = true; } if (Array.isArray(shift.applicants) && shift.applicants.includes(coworkerToDelete.name)) { shift.applicants = shift.applicants.filter(name => name !== coworkerToDelete.name); if (shift.status === "pending" && shift.applicants.length === 0) { shift.status = "available"; } shiftChanged = true; } if(shiftChanged) weekModified = true; return shift; }); if (weekModified) { batch.update(shiftsCollectionRef.doc(weekKey), { shifts: updatedShifts }); changesMadeToShifts = true; if (allShiftsData[weekKey]) { allShiftsData[weekKey].shifts = updatedShifts; } } }); if (changesMadeToShifts) { await batch.commit(); } await initializeCoworkers(); populateLoginUserDropdown(); if (loggedInCoworker && loggedInCoworker.name === coworkerToDelete.name) logout(); else { if (isManagerModeActive) await refreshManagerDashboard(); await prepareUserView(); } alert(`${coworkerToDelete.name} deleted.`); } catch (error) { console.error("Error deleting coworker:", error); alert("Failed to delete: " + error); } }
+        async function handleDeleteCoworker(coworkerDocIdOrName) { const coworkerToDelete = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName); if (!coworkerToDelete) { alert("Coworker not found."); return;} if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) { alert("Cannot delete the last manager."); return; } if (!confirm(`Delete ${coworkerToDelete.name}? This will also remove their assignments and applications.`)) return; try { await db.collection('coworkers').doc(coworkerToDelete.id || coworkerToDelete.name).delete(); const shiftsCollectionRef = db.collection('shifts'); const querySnapshot = await shiftsCollectionRef.get(); const batch = db.batch(); let changesMadeToShifts = false; querySnapshot.forEach(weekDoc => { const weekKey = weekDoc.id; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) return; let weekModified = false; const updatedShifts = weekData.shifts.map(shift => { let shiftChanged = false; if (shift.applicantName === coworkerToDelete.name) { shift.applicantName = ""; shift.status = "available"; shiftChanged = true; } if (Array.isArray(shift.applicants) && shift.applicants.includes(coworkerToDelete.name)) { shift.applicants = shift.applicants.filter(name => name !== coworkerToDelete.name); if (shift.status === "pending" && shift.applicants.length === 0) { shift.status = "available"; } shiftChanged = true; } if(shiftChanged) weekModified = true; return shift; }); if (weekModified) { batch.update(shiftsCollectionRef.doc(weekKey), { shifts: updatedShifts }); changesMadeToShifts = true; if (allShiftsData[weekKey]) { allShiftsData[weekKey].shifts = updatedShifts.map(s => JSON.parse(JSON.stringify(s)));} } }); if (changesMadeToShifts) { await batch.commit(); } await initializeCoworkers(); populateLoginUserDropdown(); if (loggedInCoworker && loggedInCoworker.name === coworkerToDelete.name) logout(); else { if (isManagerModeActive) await refreshManagerDashboard(); await prepareUserView(); } alert(`${coworkerToDelete.name} deleted.`); } catch (error) { console.error("Error deleting coworker:", error); alert("Failed to delete: " + error); } }
         async function handleChangeCoworkerPassword(coworkerDocIdOrName) { const newPassword = prompt(`Enter new password for this coworker:`); if (newPassword === null) return; if (!newPassword.trim()) { alert("Password cannot be empty."); return; } try { await db.collection('coworkers').doc(coworkerDocIdOrName).update({ password: newPassword.trim() }); const localCoworker = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName); if (localCoworker) localCoworker.password = newPassword.trim(); if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) { loggedInCoworker.password = newPassword.trim(); localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({name: loggedInCoworker.name, password: loggedInCoworker.password})); } alert(`Password updated.`); } catch (error) { console.error("Error changing password:", error); alert("Failed to change: " + error); } }
         async function handleToggleManagerStatus(coworkerDocIdOrName) { const coworkerToToggle = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName); if (!coworkerToToggle) return; const newManagerStatus = !coworkerToToggle.isManager; if (coworkerToToggle.isManager && coworkers.filter(c => c.isManager).length <= 1) { alert("Cannot demote the last manager."); return; } try { await db.collection('coworkers').doc(coworkerDocIdOrName).update({ isManager: newManagerStatus }); coworkerToToggle.isManager = newManagerStatus; renderCoworkerListForManager(); if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) { loggedInCoworker.isManager = newManagerStatus; accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager); if (!loggedInCoworker.isManager && isManagerModeActive) { isManagerModeActive = false; showCorrectView(); } } alert(`Manager status updated for ${coworkerToToggle.name}.`); } catch (error) { console.error("Error toggling manager status:", error); alert("Failed to toggle: " + error); } }
         async function handleSubmitChangeMasterPassword() { changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; const currentPassAttempt = currentMasterPasswordInput.value; const newPass = newMasterPasswordInput.value; const confirmPass = confirmNewMasterPasswordInput.value; if (currentPassAttempt !== currentMasterPassword) { changeMasterPassError.textContent = "Current Master Password incorrect."; return; } if (!newPass || newPass.length < 6) { changeMasterPassError.textContent = "New password must be at least 6 characters."; return; } if (newPass !== confirmPass) { changeMasterPassError.textContent = "New passwords do not match."; return; } try { await db.collection('config').doc('adminConfig').set({ masterAdminPassword: newPass }, { merge: true }); currentMasterPassword = newPass; changeMasterPassSuccess.textContent = "Master Admin Password changed successfully!"; currentMasterPasswordInput.value = ""; newMasterPasswordInput.value = ""; confirmNewMasterPasswordInput.value = ""; setTimeout(() => { changeMasterPasswordSection.classList.add('hidden'); changeMasterPassSuccess.textContent = ""; }, 2000); } catch (error) { console.error("Error updating master password:", error); changeMasterPassError.textContent = "Failed to update."; } }
@@ -279,45 +486,17 @@
         addCoworkerBtn.addEventListener('click', handleAddCoworker); 
         newCoworkerPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddCoworker(); });
         
-        if (prevUserAppWeekBtn) {
-            prevUserAppWeekBtn.addEventListener('click', async () => {
-                const firstAllowedAppDate = getNextWeekStartDate();
-                if (currentUserApplicationViewingDate && currentUserApplicationViewingDate.getTime() > firstAllowedAppDate.getTime()) {
-                    currentUserApplicationViewingDate.setDate(currentUserApplicationViewingDate.getDate() - 7);
-                    await renderCurrentUserApplicationWeek();
-                }
-            });
-        }
-        if (nextUserAppWeekBtn) {
-            nextUserAppWeekBtn.addEventListener('click', async () => {
-                const firstAllowedAppDate = getNextWeekStartDate();
-                const lastAllowedAppDateBoundary = new Date(firstAllowedAppDate);
-                lastAllowedAppDateBoundary.setDate(firstAllowedAppDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7));
-                if (currentUserApplicationViewingDate && getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() < getMondayOfDate(new Date(lastAllowedAppDateBoundary)).getTime()) {
-                    currentUserApplicationViewingDate.setDate(currentUserApplicationViewingDate.getDate() + 7);
-                    await renderCurrentUserApplicationWeek();
-                }
-            });
+        // --- NEW: Event Listener for Add Shift Button ---
+        if (managerAddShiftBtn) {
+            managerAddShiftBtn.addEventListener('click', managerAddNewShift);
         }
 
-        prevPastPeriodBtn.addEventListener('click', () => {
-            const viewType = pastShiftsViewTypeSelect.value;
-            if (viewType === "weekly") { currentPastShiftViewDate.setDate(currentPastShiftViewDate.getDate() - 7); }
-            else { currentPastShiftViewDate.setMonth(currentPastShiftViewDate.getMonth() - 1); }
-            renderMyPastShifts();
-        });
-        nextPastPeriodBtn.addEventListener('click', () => {
-            const viewType = pastShiftsViewTypeSelect.value;
-            if (viewType === "weekly") { currentPastShiftViewDate.setDate(currentPastShiftViewDate.getDate() + 7); }
-            else { currentPastShiftViewDate.setMonth(currentPastShiftViewDate.getMonth() + 1); }
-            renderMyPastShifts();
-        });
-        pastShiftsViewTypeSelect.addEventListener('change', () => {
-            currentPastShiftViewDate = getMondayOfDate(new Date());
-            renderMyPastShifts();
-        });
+        if (prevUserAppWeekBtn) { prevUserAppWeekBtn.addEventListener('click', async () => { const firstAllowedAppDate = getNextWeekStartDate(); if (currentUserApplicationViewingDate && currentUserApplicationViewingDate.getTime() > firstAllowedAppDate.getTime()) { currentUserApplicationViewingDate.setDate(currentUserApplicationViewingDate.getDate() - 7); await renderCurrentUserApplicationWeek(); } }); }
+        if (nextUserAppWeekBtn) { nextUserAppWeekBtn.addEventListener('click', async () => { const firstAllowedAppDate = getNextWeekStartDate(); const lastAllowedAppDateBoundary = new Date(firstAllowedAppDate); lastAllowedAppDateBoundary.setDate(firstAllowedAppDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7)); if (currentUserApplicationViewingDate && getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() < getMondayOfDate(new Date(lastAllowedAppDateBoundary)).getTime()) { currentUserApplicationViewingDate.setDate(currentUserApplicationViewingDate.getDate() + 7); await renderCurrentUserApplicationWeek(); } }); }
+        prevPastPeriodBtn.addEventListener('click', () => { const viewType = pastShiftsViewTypeSelect.value; if (viewType === "weekly") { currentPastShiftViewDate.setDate(currentPastShiftViewDate.getDate() - 7); } else { currentPastShiftViewDate.setMonth(currentPastShiftViewDate.getMonth() - 1); } renderMyPastShifts(); });
+        nextPastPeriodBtn.addEventListener('click', () => { const viewType = pastShiftsViewTypeSelect.value; if (viewType === "weekly") { currentPastShiftViewDate.setDate(currentPastShiftViewDate.getDate() + 7); } else { currentPastShiftViewDate.setMonth(currentPastShiftViewDate.getMonth() + 1); } renderMyPastShifts(); });
+        pastShiftsViewTypeSelect.addEventListener('change', () => { currentPastShiftViewDate = getMondayOfDate(new Date()); renderMyPastShifts(); });
 
-        // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
