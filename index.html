@@ -335,50 +335,76 @@
             welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
             accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
 
-            if (myPastShiftsSection) { 
+            if (myPastShiftsSection) {
                 myPastShiftsSection.classList.remove('hidden');
-                await renderMyPastShifts(); 
+                await renderMyPastShifts();
             } else {
                 console.error("myPastShiftsSection element not found in prepareUserView!");
             }
 
             try {
+                // Fetch the latest published week
                 const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get();
+
                 if (!querySnapshot.empty) {
                     const latestPublishedWeekKey = querySnapshot.docs[0].id;
-                    const latestPublishedWeekData = await getWeekData(new Date(latestPublishedWeekKey)); 
-                    latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
-                    renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
-                    latestPublishedScheduleSection.classList.remove('hidden');
-                } else {
-                    latestPublishedScheduleSection.classList.add('hidden');
+                    let latestPublishedWeekData;
+
+                    // --- MODIFICATION START ---
+                    // Force a direct fetch from Firestore for the "Latest Published Schedule"
+                    // to ensure we are not using potentially stale cached data for this specific display.
+                    console.log(`[prepareUserView] Force fetching LATEST PUBLISHED schedule for weekKey: ${latestPublishedWeekKey} directly from Firestore.`);
+                    const weekDocRef = db.collection('shifts').doc(latestPublishedWeekKey);
+                    const doc = await weekDocRef.get();
+
+                    if (doc.exists) {
+                        latestPublishedWeekData = doc.data();
+                        // Optionally, ensure the global cache (allShiftsData) is also updated with this fresh data.
+                        // This helps keep the cache consistent if other parts of the app might use this week's data.
+                        if (latestPublishedWeekData) {
+                           allShiftsData[latestPublishedWeekKey] = JSON.parse(JSON.stringify(latestPublishedWeekData)); // Deep copy
+                        }
+                    } else {
+                        console.error("Error: Published weekKey not found in direct Firestore fetch:", latestPublishedWeekKey);
+                        if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
+                        // If the specific published week document is not found, we should still try to load the application week.
+                        // The rest of the code for the application week will run after this block.
+                    }
+                    // --- MODIFICATION END ---
+
+                    // This block now only runs if latestPublishedWeekData was successfully fetched
+                    if (latestPublishedWeekData) {
+                        latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
+                        
+                        if (!latestPublishedWeekData.shifts) {
+                            latestPublishedWeekData.shifts = [];
+                            console.warn(`[prepareUserView] Fetched latestPublishedWeekData for ${latestPublishedWeekKey} had no 'shifts' array. Initializing to empty.`);
+                        }
+                        console.log(`[prepareUserView] Data for LATEST PUBLISHED schedule (${latestPublishedWeekKey}) before rendering:`, JSON.parse(JSON.stringify(latestPublishedWeekData)));
+
+                        renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
+                        latestPublishedScheduleSection.classList.remove('hidden');
+                    } else {
+                        // This else handles the case where doc.exists was false, or latestPublishedWeekData is undefined for other reasons
+                         if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
+                    }
+
+                } else { // This else is for if querySnapshot.empty is true (no published weeks found)
+                    if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
                 }
+
+                // Load application week shifts (this part should always run)
                 const applicationWeekStartDate = getNextWeekStartDate();
                 userWeekDisplay.textContent = `Application Week: ${formatDate(applicationWeekStartDate, false)}`;
-                const shiftsToDisplayForApplication = await getShiftsForWeek(applicationWeekStartDate);
+                const shiftsToDisplayForApplication = await getShiftsForWeek(applicationWeekStartDate); // getShiftsForWeek uses getWeekData, which uses cache
                 renderUserShifts(shiftsToDisplayForApplication, applicationWeekStartDate);
-            } catch (error) { 
-                console.error("Error preparing user view (published/application schedule):", error); 
-                if(userWeekDisplay) userWeekDisplay.textContent = "Error loading application shifts."; 
+
+            } catch (error) {
+                console.error("Error preparing user view (published/application schedule):", error);
+                if(userWeekDisplay) userWeekDisplay.textContent = "Error loading application shifts.";
+                if(latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
             }
         }
-
-        // --- Rendering Logic ---
-        function renderUserShifts(shiftsForWeek, forWeekDate) { userShiftsTableBody.innerHTML = ""; shiftsForWeek.forEach(shift => { const row = userShiftsTableBody.insertRow(); row.insertCell().textContent = shift.day; row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.time; const statusCell = row.insertCell(); const applicantsAssignedCell = row.insertCell(); const actionCell = row.insertCell(); const isMyAppPending = shift.status === 'pending' && shift.applicants.includes(loggedInCoworker.name); const isApproved = shift.status === 'approved'; if (isApproved) { statusCell.textContent = "Approved"; statusCell.className = 'status-approved'; applicantsAssignedCell.textContent = shift.applicantName; actionCell.textContent = "---"; } else if (isMyAppPending) { statusCell.textContent = "Pending"; statusCell.className = 'status-pending'; applicantsAssignedCell.textContent = loggedInCoworker.name; const cancelBtn = document.createElement('button'); cancelBtn.textContent = "Cancel App"; cancelBtn.classList.add("deny"); cancelBtn.onclick = () => cancelApplication(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(cancelBtn); } else { statusCell.textContent = "Available"; statusCell.className = 'status-available'; applicantsAssignedCell.textContent = "---"; const applyButton = document.createElement('button'); applyButton.textContent = "Apply"; applyButton.classList.add("apply"); applyButton.onclick = () => applyForShift(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(applyButton); } }); }
-        function renderScheduleOverview(shiftsForWeek, tableBodyElement) { tableBodyElement.innerHTML = ""; const scheduleData = {}; workDays.forEach(day => { scheduleData[day] = {}; shiftTimes.forEach(time => scheduleData[day][time] = "Unassigned"); }); shiftsForWeek.filter(s => s.status === "approved").forEach(shift => { if (scheduleData[shift.day]) scheduleData[shift.day][shift.time] = shift.applicantName; }); workDays.forEach(day => { const row = tableBodyElement.insertRow(); const dayCell = row.insertCell(); const shiftOnThisDay = shiftsForWeek.find(s => s.day === day); dayCell.innerHTML = `${day}<br><small>${shiftOnThisDay ? formatDate(new Date(shiftOnThisDay.date), false) : ''}</small>`; shiftTimes.forEach(time => { const cell = row.insertCell(); cell.textContent = scheduleData[day][time] || "Unassigned"; if (scheduleData[day][time] && scheduleData[day][time] !== "Unassigned") { cell.style.fontWeight = "bold"; } }); }); }
-        async function refreshManagerDashboard() { if (!isManagerModeActive) return; try { const weekData = await getWeekData(currentViewingDateMgr); const shiftsForViewingWeek = weekData.shifts; managerSidebarWeekDisplay.textContent = `Week: ${formatDate(currentViewingDateMgr, false)}`; managerApplicationWeekDisplay.textContent = `Apps for week: ${formatDate(currentViewingDateMgr, false)}`; managerSchedulePreviewTitle.textContent = `Schedule: Week of ${formatDate(currentViewingDateMgr, false)}`; renderManagerApplications(shiftsForViewingWeek); renderScheduleOverview(shiftsForViewingWeek, managerSchedulePreviewTableBody); renderCoworkerListForManager(); renderHoursOverview(shiftsForViewingWeek); await renderTotalHoursSummary(); if (weekData.isPublished) { publishWeekBtn.textContent = "Unpublish Week"; publishWeekBtn.classList.remove("publish"); publishWeekBtn.classList.add("deny"); publishStatusIndicator.textContent = "Status: Published"; publishStatusIndicator.style.color = "green"; } else { publishWeekBtn.textContent = "Publish Week"; publishWeekBtn.classList.add("publish"); publishWeekBtn.classList.remove("deny"); publishStatusIndicator.textContent = "Status: Not Published"; publishStatusIndicator.style.color = "orange"; } } catch (error) { console.error("Error refreshing manager dashboard:", error); } }
-        function renderManagerApplications(shiftsForWeek) { managerShiftsTableBody.innerHTML = ""; shiftsForWeek.forEach(shift => { const row = managerShiftsTableBody.insertRow(); row.insertCell().textContent = shift.day; row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.time; const statusCell = row.insertCell(); statusCell.textContent = shift.status.charAt(0).toUpperCase() + shift.status.slice(1); statusCell.className = `status-${shift.status}`; let applicantDisplay = "---"; if (shift.status === "pending" && shift.applicants && shift.applicants.length > 0) { applicantDisplay = shift.applicants.join(', '); } else if (shift.status === "approved") { applicantDisplay = shift.applicantName; } row.insertCell().textContent = applicantDisplay; const actionCell = row.insertCell(); actionCell.classList.add("action-cell"); const weekKey = getWeekKey(new Date(shift.date)); if (shift.status === "pending" && shift.applicants && shift.applicants.length > 0) { const applicantSelect = document.createElement('select'); applicantSelect.id = `select-pending-${shift.id}`; shift.applicants.forEach(appName => { const option = document.createElement('option'); option.value = appName; option.textContent = appName; applicantSelect.appendChild(option); }); actionCell.appendChild(applicantSelect); const approveSelectedBtn = document.createElement('button'); approveSelectedBtn.textContent = "Approve Sel."; approveSelectedBtn.classList.add("approve", "small-action"); approveSelectedBtn.onclick = () => { const selectedName = document.getElementById(`select-pending-${shift.id}`).value; managerApproveSelectedApplicant(shift.id, weekKey, selectedName); }; actionCell.appendChild(approveSelectedBtn); const denyAllBtn = document.createElement('button'); denyAllBtn.textContent = "Deny All"; denyAllBtn.classList.add("deny", "small-action"); denyAllBtn.style.marginLeft = "5px"; denyAllBtn.onclick = () => managerDenyAllApplicants(shift.id, weekKey); actionCell.appendChild(denyAllBtn); } else if (shift.status === "approved") { const clearBtn = document.createElement('button'); clearBtn.textContent = "Clear"; clearBtn.classList.add("deny", "small-action"); clearBtn.onclick = () => managerClearApprovedShift(shift.id, weekKey); actionCell.appendChild(clearBtn); actionCell.appendChild(document.createElement('hr')); } if (shift.status === "available" || shift.status === "approved") { const manualAssignSelect = document.createElement('select'); manualAssignSelect.id = `select-manual-${shift.id}`; manualAssignSelect.innerHTML = '<option value="">-- Assign To --</option>'; coworkers.forEach(cw => { const option = document.createElement('option'); option.value = cw.name; option.textContent = cw.name; manualAssignSelect.appendChild(option); }); actionCell.appendChild(manualAssignSelect); const manualAssignBtn = document.createElement('button'); manualAssignBtn.textContent = "Assign"; manualAssignBtn.classList.add("assign", "small-action"); manualAssignBtn.onclick = () => { const selectedName = document.getElementById(`select-manual-${shift.id}`).value; if (selectedName) { managerManuallyAssignShift(shift.id, weekKey, selectedName); } else { alert("Please select a coworker to assign."); } }; actionCell.appendChild(manualAssignBtn); } }); }
-        function renderHoursOverview(shiftsForViewingWeek) { hoursOverviewList.innerHTML = ""; const type = hoursViewTypeSelect.value; const hoursData = {}; coworkers.forEach(c => hoursData[c.name] = 0); if (type === "weekly") { shiftsForViewingWeek.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (hoursData.hasOwnProperty(s.applicantName)) { hoursData[s.applicantName] += SHIFT_DURATION_HOURS; } }); } else if (type === "monthly") { const targetMonth = currentViewingDateMgr.getMonth(); const targetYear = currentViewingDateMgr.getFullYear(); // For monthly, iterate all cached shifts if available or query. Here, use cached.
-            for (const weekKey in allShiftsData) {
-                const weekStartDate = new Date(weekKey);
-                if (weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear) {
-                    allShiftsData[weekKey].shifts.filter(s => s.status === "approved" && s.applicantName).forEach(s => {
-                         if (hoursData.hasOwnProperty(s.applicantName)) { hoursData[s.applicantName] += SHIFT_DURATION_HOURS; }
-                    });
-                }
-            }
-        } const sortedCoworkers = Object.keys(hoursData).sort(); sortedCoworkers.forEach(name => { const item = document.createElement('div'); item.classList.add('hours-overview-item'); item.textContent = `${name}: ${hoursData[name].toFixed(1)} hrs`; hoursOverviewList.appendChild(item); }); }
-        
         async function renderMyPastShifts() {
             if (!loggedInCoworker) {
                 if (myPastShiftsSection) myPastShiftsSection.classList.add('hidden');
