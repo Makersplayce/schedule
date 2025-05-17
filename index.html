@@ -71,13 +71,11 @@
                 <div id="userShiftView" class="container view-section">
                     <div class="top-bar"><h2 id="welcomeUserName">Welcome, [User]!</h2><div><button id="accessManagerPanelBtn" class="secondary hidden">Manager Panel</button><button id="userLogoutBtn" class="secondary">Logout</button></div></div>
                     
-                    <!-- New Application Week Navigation -->
                     <div class="week-navigation" id="userApplicationWeekNav" style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
                         <button id="prevUserAppWeekBtn" class="small-action">« Prev App Week</button>
                         <strong id="currentUserAppWeekDisplay" style="margin: 0 10px; font-size: 1.1em;"></strong>
                         <button id="nextUserAppWeekBtn" class="small-action">Next App Week »</button>
                     </div>
-                    <!-- End New Application Week Navigation -->
                     
                     <h3>Available Shifts & Your Applications</h3>
                     <table id="userShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time</th><th>Status</th><th>Your Status / Assigned</th><th>Action</th></tr></thead><tbody></tbody></table>
@@ -140,7 +138,7 @@
         const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         const shiftTimes = ["9:30 - 13:00", "13:00 - 16:30"];
         const SHIFT_DURATION_HOURS = 3.5;
-        const USER_APPLICATION_WEEKS_FORWARD = 4; // How many weeks *after* the initial next application week
+        const USER_APPLICATION_WEEKS_FORWARD = 4; 
 
         let currentMasterPassword = DEFAULT_MASTER_PASSWORD;
         let coworkers = [];
@@ -149,7 +147,7 @@
         let currentViewingDateMgr;
         let allShiftsData = {};
         let currentPastShiftViewDate;
-        let currentUserApplicationViewingDate; // For user's application week navigation
+        let currentUserApplicationViewingDate; 
 
         // DOM Elements
         const initialLoginViewWrapper = document.getElementById('initialLoginViewWrapper');
@@ -164,10 +162,8 @@
         const welcomeUserName = document.getElementById('welcomeUserName');
         const accessManagerPanelBtn = document.getElementById('accessManagerPanelBtn');
         const userLogoutBtn = document.getElementById('userLogoutBtn');
-        // const userWeekDisplay = document.getElementById('userWeekDisplay'); // Replaced by currentUserAppWeekDisplay
         const userShiftsTableBody = document.getElementById('userShiftsTable').getElementsByTagName('tbody')[0];
         
-        // User Application Week Navigation DOM Elements
         const prevUserAppWeekBtn = document.getElementById('prevUserAppWeekBtn');
         const currentUserAppWeekDisplay = document.getElementById('currentUserAppWeekDisplay');
         const nextUserAppWeekBtn = document.getElementById('nextUserAppWeekBtn');
@@ -218,125 +214,26 @@
         const totalHoursPeriodSelect = document.getElementById('totalHoursPeriodSelect');
         const totalHoursSummaryTableBody = document.getElementById('totalHoursSummaryTable').getElementsByTagName('tbody')[0];
 
-
-        // --- Date & Utility Functions ---
         function getMondayOfDate(d) { d = new Date(d); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); monday.setHours(0,0,0,0); return monday; }
         function getNextWeekStartDate(fromDate) { const baseDate = fromDate ? new Date(fromDate) : new Date(); const monday = getMondayOfDate(baseDate); monday.setDate(monday.getDate() + 7); return monday; }
         function formatDate(dateObj, includeDayName = true) { if (!dateObj || !(dateObj instanceof Date) || isNaN(dateObj.getTime())) return 'Invalid Date'; const dayStr = includeDayName ? `${dayNames[dateObj.getDay()]}, ` : ''; return `${dayStr}${dateObj.toLocaleString('default', { month: 'short' })} ${dateObj.getDate()}, ${dateObj.getFullYear()}`; }
         function getWeekKey(dateObj) { return getMondayOfDate(dateObj).toISOString().split('T')[0]; }
 
-        // --- Initialization ---
-        async function initializeApp() {
-            try {
-                await loadMasterPassword();
-                currentViewingDateMgr = getNextWeekStartDate();
-                currentPastShiftViewDate = getMondayOfDate(new Date());
-                currentUserApplicationViewingDate = getNextWeekStartDate(); // Initialize user's app view date
-                await initializeCoworkers();
-                populateLoginUserDropdown();
-                checkActiveSession();
-            } catch (error) {
-                console.error("Error during app initialization:", error);
-                if(initialLoginError) initialLoginError.textContent = "Failed to initialize. Check console for details.";
-            }
-        }
-
+        async function initializeApp() { try { await loadMasterPassword(); currentViewingDateMgr = getNextWeekStartDate(); currentPastShiftViewDate = getMondayOfDate(new Date()); currentUserApplicationViewingDate = getNextWeekStartDate(); await initializeCoworkers(); populateLoginUserDropdown(); checkActiveSession(); } catch (error) { console.error("Error during app initialization:", error); if(initialLoginError) initialLoginError.textContent = "Failed to initialize. Check console for details."; } }
         async function loadMasterPassword() { try { const configRef = db.collection('config').doc('adminConfig'); const doc = await configRef.get(); if (doc.exists && doc.data().masterAdminPassword) { currentMasterPassword = doc.data().masterAdminPassword; } else { currentMasterPassword = DEFAULT_MASTER_PASSWORD; try { await configRef.set({ masterAdminPassword: DEFAULT_MASTER_PASSWORD }, { merge: true }); } catch (setConfigError) { console.error("Could not save default master password:", setConfigError); } } } catch (error) { console.error("Error loading master password:", error); currentMasterPassword = DEFAULT_MASTER_PASSWORD; } }
         async function getWeekData(weekStartDate) { const weekKey = getWeekKey(weekStartDate); if (allShiftsData[weekKey]) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts) && typeof allShiftsData[weekKey].isPublished === 'boolean') { return JSON.parse(JSON.stringify(allShiftsData[weekKey])); } else { delete allShiftsData[weekKey]; } } const weekDocRef = db.collection('shifts').doc(weekKey); try { const doc = await weekDocRef.get(); if (doc.exists) { let data = doc.data(); if (typeof data !== 'object' || data === null) data = {}; if (!Array.isArray(data.shifts)) { data.shifts = []; } if (typeof data.isPublished !== 'boolean') { data.isPublished = false; } data.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(data)); return data; } else { const newWeekShifts = []; let idCounter = Date.now(); for (let i = 0; i < workDays.length; i++) { const dayName = workDays[i]; const currentShiftDate = new Date(weekStartDate); currentShiftDate.setDate(weekStartDate.getDate() + i); shiftTimes.forEach(time => { newWeekShifts.push({ id: `${weekKey}-${idCounter++}`, day: dayName, date: currentShiftDate.toISOString(), time: time, status: "available", applicants: [], applicantName: "" }); }); } const newWeekData = { shifts: newWeekShifts, isPublished: false }; await weekDocRef.set(newWeekData); allShiftsData[weekKey] = JSON.parse(JSON.stringify(newWeekData)); return newWeekData; } } catch (error) { console.error(`Error getting week data for ${weekKey}:`, error); const fallbackData = { shifts: [], isPublished: false, error: true, errorMessage: error.message }; allShiftsData[weekKey] = JSON.parse(JSON.stringify(fallbackData)); return fallbackData; } }
         async function getShiftsForWeek(weekStartDate) { const weekData = await getWeekData(weekStartDate); return weekData; }
         async function initializeCoworkers() { try { const snapshot = await db.collection('coworkers').get(); if (snapshot.empty) { coworkers = [ { name: "Ties", password: "1234", isManager: true }, { name: "Joep", password: "1234", isManager: false }, { name: "Jesper", password: "1234", isManager: false }, { name: "Inti", password: "1234", isManager: false }, { name: "Martijn", password: "1234", isManager: false }, { name: "Mathijs", password: "1234", isManager: false }, { name: "Dominik", password: "1234", isManager: false }, { name: "Jippe", password: "1234", isManager: false }, { name: "Zeynep", password: "1234", isManager: false } ]; const batch = db.batch(); coworkers.forEach(cw => { const docRef = db.collection('coworkers').doc(cw.name); batch.set(docRef, cw); }); await batch.commit(); } else { coworkers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); } } catch (error) { console.error("Error initializing coworkers:", error); coworkers = []; throw error; } }
-
         function showCorrectView() { [initialLoginViewWrapper, userShiftViewWrapper, managerDashboardView, managerUnlockModal, changeMasterPasswordSection, myPastShiftsSection].forEach(v => { if(v) v.classList.add('hidden'); }); if (isManagerModeActive && loggedInCoworker && loggedInCoworker.isManager) { managerDashboardView.classList.remove('hidden'); managerLoggedInAs.textContent = `Logged in as: ${loggedInCoworker.name}`; refreshManagerDashboard(); } else if (loggedInCoworker) { userShiftViewWrapper.classList.remove('hidden'); prepareUserView(); } else { initialLoginViewWrapper.classList.remove('hidden'); } }
         function checkActiveSession() { const activeUserJSON = localStorage.getItem(ACTIVE_SESSION_USER_KEY); if (activeUserJSON) { const activeUser = JSON.parse(activeUserJSON); const foundCoworker = coworkers.find(c => c.name === activeUser.name); if (foundCoworker) { if(activeUser.password === foundCoworker.password){ loggedInCoworker = foundCoworker; } else { logout(); return; } } else { logout(); return; } } showCorrectView(); }
         function populateLoginUserDropdown() { loginUserSelect.innerHTML = '<option value="">-- Select Name --</option>'; coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(coworker => { const option = document.createElement('option'); option.value = coworker.name; option.textContent = coworker.name; loginUserSelect.appendChild(option); }); }
-        function handleCoworkerLogin() { const selectedName = loginUserSelect.value; const password = loginPasswordInput.value; initialLoginError.textContent = ""; if (!selectedName || !password) { initialLoginError.textContent = "Name and password are required."; return; } const coworker = coworkers.find(c => c.name === selectedName); if (coworker && coworker.password === password) { loggedInCoworker = coworker; localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({name: coworker.name, password: coworker.password})); loginPasswordInput.value = ""; isManagerModeActive = false; currentUserApplicationViewingDate = getNextWeekStartDate(); // Reset on login showCorrectView(); } else { initialLoginError.textContent = "Invalid name or password."; loginPasswordInput.value = ""; } }
+        function handleCoworkerLogin() { const selectedName = loginUserSelect.value; const password = loginPasswordInput.value; initialLoginError.textContent = ""; if (!selectedName || !password) { initialLoginError.textContent = "Name and password are required."; return; } const coworker = coworkers.find(c => c.name === selectedName); if (coworker && coworker.password === password) { loggedInCoworker = coworker; localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({name: coworker.name, password: coworker.password})); loginPasswordInput.value = ""; isManagerModeActive = false; currentUserApplicationViewingDate = getNextWeekStartDate(); showCorrectView(); } else { initialLoginError.textContent = "Invalid name or password."; loginPasswordInput.value = ""; } }
         function handleAccessManagerPanel() { if (loggedInCoworker && loggedInCoworker.isManager) { managerUnlockModal.classList.remove('hidden'); masterManagerPasswordInput.value = ""; managerUnlockError.textContent = ""; masterManagerPasswordInput.focus(); } }
         function handleUnlockManagerPanel() { if (masterManagerPasswordInput.value === currentMasterPassword) { isManagerModeActive = true; managerUnlockModal.classList.add('hidden'); showCorrectView(); } else { managerUnlockError.textContent = "Incorrect Master Password."; } }
         function logout() { loggedInCoworker = null; isManagerModeActive = false; localStorage.removeItem(ACTIVE_SESSION_USER_KEY); loginPasswordInput.value = ""; masterManagerPasswordInput.value = ""; initialLoginError.textContent = ""; managerUnlockError.textContent = ""; changeMasterPasswordSection.classList.add('hidden'); showCorrectView(); }
 
-        // --- MODIFIED prepareUserView to use renderCurrentUserApplicationWeek ---
-        async function prepareUserView() {
-            if (!loggedInCoworker) return;
-            welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
-            accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
-
-            if (myPastShiftsSection) {
-                myPastShiftsSection.classList.remove('hidden');
-                await renderMyPastShifts();
-            }
-
-            try {
-                const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get();
-                if (!querySnapshot.empty) {
-                    const latestPublishedWeekKey = querySnapshot.docs[0].id;
-                    let latestPublishedWeekData;
-                    const weekDocRef = db.collection('shifts').doc(latestPublishedWeekKey);
-                    const doc = await weekDocRef.get();
-                    if (doc.exists) {
-                        latestPublishedWeekData = doc.data();
-                        if (typeof latestPublishedWeekData !== 'object' || latestPublishedWeekData === null) latestPublishedWeekData = {};
-                        if (!Array.isArray(latestPublishedWeekData.shifts)) { latestPublishedWeekData.shifts = []; }
-                        if (typeof latestPublishedWeekData.isPublished !== 'boolean') { latestPublishedWeekData.isPublished = (doc.data() && typeof doc.data().isPublished === 'boolean') ? doc.data().isPublished : false; }
-                        latestPublishedWeekData.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; });
-                        allShiftsData[latestPublishedWeekKey] = JSON.parse(JSON.stringify(latestPublishedWeekData));
-                         if (latestPublishedWeekData.shifts) {
-                            latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
-                            renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
-                            latestPublishedScheduleSection.classList.remove('hidden');
-                        } else {
-                            if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
-                        }
-                    } else {
-                        if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
-                    }
-                } else {
-                    if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
-                }
-                
-                // Initialize or ensure currentUserApplicationViewingDate is set
-                if (!currentUserApplicationViewingDate) { // Should be set by initializeApp or login
-                    currentUserApplicationViewingDate = getNextWeekStartDate();
-                }
-                await renderCurrentUserApplicationWeek(); // Render the current application week
-
-            } catch (error) {
-                console.error("Error preparing user view (outer try-catch):", error);
-                if(currentUserAppWeekDisplay) currentUserAppWeekDisplay.textContent = "Error loading shifts.";
-                if(latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
-            }
-        }
-        
-        // --- NEW FUNCTION to render shifts for the user's currently selected application week ---
-        async function renderCurrentUserApplicationWeek() {
-            if (!loggedInCoworker || !currentUserApplicationViewingDate) return;
-
-            const firstAllowedAppDate = getNextWeekStartDate(); // Week +1 from today (Monday)
-            const lastAllowedAppDate = new Date(firstAllowedAppDate);
-            lastAllowedAppDate.setDate(firstAllowedAppDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7)); // End of the 5th week
-
-            if (currentUserAppWeekDisplay) {
-                currentUserAppWeekDisplay.textContent = `Application Week: ${formatDate(currentUserApplicationViewingDate, false)}`;
-            }
-
-            const weekData = await getShiftsForWeek(currentUserApplicationViewingDate);
-            if (weekData.error) {
-                if(userShiftsTableBody) userShiftsTableBody.innerHTML = '<tr><td colspan="6">Error loading shifts.</td></tr>';
-            } else if (weekData.shifts) {
-                renderUserShifts(weekData.shifts, currentUserApplicationViewingDate);
-            } else {
-                if(userShiftsTableBody) userShiftsTableBody.innerHTML = '<tr><td colspan="6">No shifts available for this week.</td></tr>';
-            }
-
-            if (prevUserAppWeekBtn) {
-                prevUserAppWeekBtn.disabled = currentUserApplicationViewingDate.getTime() <= firstAllowedAppDate.getTime();
-            }
-            if (nextUserAppWeekBtn) {
-                // Compare the Monday of the current viewing date with the Monday of the last allowed date
-                nextUserAppWeekBtn.disabled = getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() >= getMondayOfDate(new Date(lastAllowedAppDate)).getTime();
-            }
-        }
-
-
+        async function prepareUserView() { if (!loggedInCoworker) return; welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`; accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager); if (myPastShiftsSection) { myPastShiftsSection.classList.remove('hidden'); await renderMyPastShifts(); } try { const querySnapshot = await db.collection('shifts').where('isPublished', '==', true).orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(1).get(); if (!querySnapshot.empty) { const latestPublishedWeekKey = querySnapshot.docs[0].id; let latestPublishedWeekData; const weekDocRef = db.collection('shifts').doc(latestPublishedWeekKey); const doc = await weekDocRef.get(); if (doc.exists) { latestPublishedWeekData = doc.data(); if (typeof latestPublishedWeekData !== 'object' || latestPublishedWeekData === null) latestPublishedWeekData = {}; if (!Array.isArray(latestPublishedWeekData.shifts)) { latestPublishedWeekData.shifts = []; } if (typeof latestPublishedWeekData.isPublished !== 'boolean') { latestPublishedWeekData.isPublished = (doc.data() && typeof doc.data().isPublished === 'boolean') ? doc.data().isPublished : false; } latestPublishedWeekData.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; }); allShiftsData[latestPublishedWeekKey] = JSON.parse(JSON.stringify(latestPublishedWeekData)); if (latestPublishedWeekData.shifts) { latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`; renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody); latestPublishedScheduleSection.classList.remove('hidden'); } else { if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } } else { if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } } else { if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } if (!currentUserApplicationViewingDate) { currentUserApplicationViewingDate = getNextWeekStartDate(); } await renderCurrentUserApplicationWeek(); } catch (error) { console.error("Error preparing user view (outer try-catch):", error); if(currentUserAppWeekDisplay) currentUserAppWeekDisplay.textContent = "Error loading shifts."; if(latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden'); } }
+        async function renderCurrentUserApplicationWeek() { if (!loggedInCoworker || !currentUserApplicationViewingDate) return; const firstAllowedAppDate = getNextWeekStartDate(); const lastAllowedAppDate = new Date(firstAllowedAppDate); lastAllowedAppDate.setDate(firstAllowedAppDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7)); if (currentUserAppWeekDisplay) { currentUserAppWeekDisplay.textContent = `Application Week: ${formatDate(currentUserApplicationViewingDate, false)}`; } const weekData = await getShiftsForWeek(currentUserApplicationViewingDate); if (weekData.error) { if(userShiftsTableBody) userShiftsTableBody.innerHTML = '<tr><td colspan="6">Error loading shifts.</td></tr>'; } else if (weekData.shifts) { renderUserShifts(weekData.shifts, currentUserApplicationViewingDate); } else { if(userShiftsTableBody) userShiftsTableBody.innerHTML = '<tr><td colspan="6">No shifts available for this week.</td></tr>'; } if (prevUserAppWeekBtn) { prevUserAppWeekBtn.disabled = currentUserApplicationViewingDate.getTime() <= firstAllowedAppDate.getTime(); } if (nextUserAppWeekBtn) { nextUserAppWeekBtn.disabled = getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() >= getMondayOfDate(new Date(lastAllowedAppDate)).getTime(); } }
         function renderUserShifts(shiftsForWeek, forWeekDate) { userShiftsTableBody.innerHTML = ""; if (!shiftsForWeek || !Array.isArray(shiftsForWeek)) { userShiftsTableBody.innerHTML = '<tr><td colspan="6">Error: Could not load shifts.</td></tr>'; return; } shiftsForWeek.forEach(shift => { const row = userShiftsTableBody.insertRow(); row.insertCell().textContent = shift.day; row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.time; const statusCell = row.insertCell(); const applicantsAssignedCell = row.insertCell(); const actionCell = row.insertCell(); const isMyAppPending = shift.status === 'pending' && Array.isArray(shift.applicants) && shift.applicants.includes(loggedInCoworker.name); const isApproved = shift.status === 'approved'; if (isApproved) { statusCell.textContent = "Approved"; statusCell.className = 'status-approved'; applicantsAssignedCell.textContent = shift.applicantName; actionCell.textContent = "---"; } else if (isMyAppPending) { statusCell.textContent = "Pending"; statusCell.className = 'status-pending'; applicantsAssignedCell.textContent = loggedInCoworker.name; const cancelBtn = document.createElement('button'); cancelBtn.textContent = "Cancel App"; cancelBtn.classList.add("deny"); cancelBtn.onclick = () => cancelApplication(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(cancelBtn); } else { statusCell.textContent = "Available"; statusCell.className = 'status-available'; applicantsAssignedCell.textContent = "---"; const applyButton = document.createElement('button'); applyButton.textContent = "Apply"; applyButton.classList.add("apply"); applyButton.onclick = () => applyForShift(shift.id, getWeekKey(forWeekDate)); actionCell.appendChild(applyButton); } }); }
         function renderScheduleOverview(shiftsForWeek, tableBodyElement) { tableBodyElement.innerHTML = ""; if (!shiftsForWeek || !Array.isArray(shiftsForWeek)) { tableBodyElement.innerHTML = '<tr><td colspan="3">Error: Could not load schedule.</td></tr>'; return; } const scheduleData = {}; workDays.forEach(day => { scheduleData[day] = {}; shiftTimes.forEach(time => scheduleData[day][time] = "Unassigned"); }); shiftsForWeek.filter(s => s.status === "approved").forEach(shift => { if (scheduleData[shift.day]) scheduleData[shift.day][shift.time] = shift.applicantName; }); workDays.forEach(day => { const row = tableBodyElement.insertRow(); const dayCell = row.insertCell(); const shiftOnThisDay = shiftsForWeek.find(s => s.day === day); dayCell.innerHTML = `${day}<br><small>${shiftOnThisDay ? formatDate(new Date(shiftOnThisDay.date), false) : ''}</small>`; shiftTimes.forEach(time => { const cell = row.insertCell(); cell.textContent = scheduleData[day][time] || "Unassigned"; if (scheduleData[day][time] && scheduleData[day][time] !== "Unassigned") { cell.style.fontWeight = "bold"; } }); }); }
         async function refreshManagerDashboard() { if (!isManagerModeActive) return; try { const weekData = await getWeekData(currentViewingDateMgr); if (weekData.error || !weekData.shifts) { managerSidebarWeekDisplay.textContent = "Error loading week."; managerApplicationWeekDisplay.textContent = "Error loading apps."; managerSchedulePreviewTitle.textContent = "Error loading schedule."; if(managerShiftsTableBody) managerShiftsTableBody.innerHTML = '<tr><td colspan="6">Error loading shifts.</td></tr>'; if(managerSchedulePreviewTableBody) managerSchedulePreviewTableBody.innerHTML = '<tr><td colspan="3">Error loading preview.</td></tr>'; if(hoursOverviewList) hoursOverviewList.innerHTML = "<p>Error loading hours.</p>"; return; } const shiftsForViewingWeek = weekData.shifts; managerSidebarWeekDisplay.textContent = `Week: ${formatDate(currentViewingDateMgr, false)}`; managerApplicationWeekDisplay.textContent = `Apps for week: ${formatDate(currentViewingDateMgr, false)}`; managerSchedulePreviewTitle.textContent = `Schedule: Week of ${formatDate(currentViewingDateMgr, false)}`; renderManagerApplications(shiftsForViewingWeek); renderScheduleOverview(shiftsForViewingWeek, managerSchedulePreviewTableBody); renderCoworkerListForManager(); renderHoursOverview(shiftsForViewingWeek); await renderTotalHoursSummary(); if (weekData.isPublished) { publishWeekBtn.textContent = "Unpublish Week"; publishWeekBtn.classList.remove("publish"); publishWeekBtn.classList.add("deny"); publishStatusIndicator.textContent = "Status: Published"; publishStatusIndicator.style.color = "green"; } else { publishWeekBtn.textContent = "Publish Week"; publishWeekBtn.classList.add("publish"); publishWeekBtn.classList.remove("deny"); publishStatusIndicator.textContent = "Status: Not Published"; publishStatusIndicator.style.color = "orange"; } } catch (error) { console.error("Error refreshing manager dashboard:", error); } }
@@ -344,7 +241,6 @@
         function renderHoursOverview(shiftsForViewingWeek) { hoursOverviewList.innerHTML = ""; if (!shiftsForViewingWeek || !Array.isArray(shiftsForViewingWeek)) { hoursOverviewList.innerHTML = "<p>Could not load hours.</p>"; return; } const type = hoursViewTypeSelect.value; const hoursData = {}; coworkers.forEach(c => hoursData[c.name] = 0); if (type === "weekly") { shiftsForViewingWeek.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (hoursData.hasOwnProperty(s.applicantName)) { hoursData[s.applicantName] += SHIFT_DURATION_HOURS; } }); } else if (type === "monthly") { const targetMonth = currentViewingDateMgr.getMonth(); const targetYear = currentViewingDateMgr.getFullYear(); for (const weekKey in allShiftsData) { const weekStartDate = new Date(weekKey); if (weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear && allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { allShiftsData[weekKey].shifts.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (hoursData.hasOwnProperty(s.applicantName)) { hoursData[s.applicantName] += SHIFT_DURATION_HOURS; } }); } } } const sortedCoworkers = Object.keys(hoursData).sort(); sortedCoworkers.forEach(name => { const item = document.createElement('div'); item.classList.add('hours-overview-item'); item.textContent = `${name}: ${hoursData[name].toFixed(1)} hrs`; hoursOverviewList.appendChild(item); }); }
         async function renderMyPastShifts() { if (!loggedInCoworker) { if (myPastShiftsSection) myPastShiftsSection.classList.add('hidden'); return; } if (!myPastShiftsSection) { return; } myPastShiftsSection.classList.remove('hidden'); const viewType = pastShiftsViewTypeSelect.value; myPastShiftsTableBody.innerHTML = ""; let periodStart, periodEnd, displayPeriodString = ""; if (viewType === "weekly") { periodStart = getMondayOfDate(new Date(currentPastShiftViewDate)); periodEnd = new Date(periodStart); periodEnd.setDate(periodStart.getDate() + 6); periodEnd.setHours(23, 59, 59, 999); displayPeriodString = `Week of ${formatDate(periodStart, false)}`; } else { periodStart = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth(), 1); periodEnd = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth() + 1, 0); periodEnd.setHours(23, 59, 59, 999); displayPeriodString = `${periodStart.toLocaleString('default', { month: 'long' })} ${periodStart.getFullYear()}`; } myPastShiftsPeriodDisplay.textContent = displayPeriodString; const userPastShifts = []; try { for (const weekKey in allShiftsData) { const weekData = allShiftsData[weekKey]; if (weekData && Array.isArray(weekData.shifts)) { weekData.shifts.forEach(shift => { const shiftDate = new Date(shift.date); if ( shift.status === 'approved' && shift.applicantName === loggedInCoworker.name && shiftDate >= periodStart && shiftDate <= periodEnd ) { userPastShifts.push(shift); } }); } } } catch (error) { myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">Error loading past shifts.</td></tr>`; return; } if (userPastShifts.length === 0) { myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">No approved shifts found.</td></tr>`; return; } userPastShifts.sort((a, b) => new Date(a.date) - new Date(b.date)); userPastShifts.forEach(shift => { const row = myPastShiftsTableBody.insertRow(); row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.day; row.insertCell().textContent = shift.time; }); }
         async function renderTotalHoursSummary() { totalHoursSummaryTableBody.innerHTML = ""; const period = totalHoursPeriodSelect.value; const summaryData = {}; coworkers.forEach(c => summaryData[c.name] = 0); let shiftsToConsider = []; if (period === "viewing_week") { const weekData = await getShiftsForWeek(currentViewingDateMgr); if (weekData && Array.isArray(weekData.shifts)) shiftsToConsider = weekData.shifts; } else if (period === "viewing_month") { const targetMonth = currentViewingDateMgr.getMonth(); const targetYear = currentViewingDateMgr.getFullYear(); for (const weekKey in allShiftsData) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { const weekStartDate = new Date(weekKey); if(weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear) { shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts); } } } } else if (period === "all_loaded") { for (const weekKey in allShiftsData) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts); } } } shiftsToConsider.filter(s => s.status === "approved" && s.applicantName).forEach(s => { if (summaryData.hasOwnProperty(s.applicantName)) { summaryData[s.applicantName] += SHIFT_DURATION_HOURS; } }); const sortedCoworkerNames = Object.keys(summaryData).sort(); sortedCoworkerNames.forEach(name => { const row = totalHoursSummaryTableBody.insertRow(); row.insertCell().textContent = name; row.insertCell().textContent = summaryData[name].toFixed(1) + " hrs"; }); }
-
         async function applyForShift(shiftId, weekKey) { if (!loggedInCoworker) { alert("You must be logged in."); return; } const weekDocRef = db.collection('shifts').doc(weekKey); try { await db.runTransaction(async (transaction) => { const weekDoc = await transaction.get(weekDocRef); if (!weekDoc.exists) throw "Shift data not found!"; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data."; const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId); if (shiftIndex === -1) throw "Shift not found!"; const shift = weekData.shifts[shiftIndex]; if (shift.status === 'approved') { alert("Shift already approved."); return; } if (!Array.isArray(shift.applicants)) shift.applicants = []; if (shift.applicants.includes(loggedInCoworker.name)) { alert("Already applied."); return; } weekData.shifts[shiftIndex].applicants.push(loggedInCoworker.name); weekData.shifts[shiftIndex].status = "pending"; weekData.shifts[shiftIndex].applicantName = ""; transaction.update(weekDocRef, { shifts: weekData.shifts }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); }); await renderCurrentUserApplicationWeek(); } catch (error) { console.error("Error applying for shift:", error); alert("Failed to apply: " + error); } }
         async function cancelApplication(shiftId, weekKey) { if (!loggedInCoworker) return; const weekDocRef = db.collection('shifts').doc(weekKey); try { await db.runTransaction(async (transaction) => { const weekDoc = await transaction.get(weekDocRef); if (!weekDoc.exists) throw "Shift data not found!"; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data."; const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId); if (shiftIndex === -1) throw "Shift not found!"; const shift = weekData.shifts[shiftIndex]; if (!Array.isArray(shift.applicants)) shift.applicants = []; if (shift.status !== 'pending' || !shift.applicants.includes(loggedInCoworker.name)) { alert("Cannot cancel."); return; } weekData.shifts[shiftIndex].applicants = shift.applicants.filter(name => name !== loggedInCoworker.name); if (weekData.shifts[shiftIndex].applicants.length === 0) { weekData.shifts[shiftIndex].status = "available"; } transaction.update(weekDocRef, { shifts: weekData.shifts }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); }); await renderCurrentUserApplicationWeek(); } catch (error) { console.error("Error cancelling application:", error); alert("Failed to cancel: " + error); } }
         async function managerApproveSelectedApplicant(shiftId, weekKey, selectedApplicantName) { const weekDocRef = db.collection('shifts').doc(weekKey); try { await db.runTransaction(async (transaction) => { const weekDoc = await transaction.get(weekDocRef); if (!weekDoc.exists) throw "Shift data not found!"; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data."; const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId); if (shiftIndex === -1) throw "Shift not found!"; if (weekData.shifts[shiftIndex].status !== 'pending') { alert("Shift not pending."); return; } weekData.shifts[shiftIndex].status = "approved"; weekData.shifts[shiftIndex].applicantName = selectedApplicantName; weekData.shifts[shiftIndex].applicants = []; transaction.update(weekDocRef, { shifts: weekData.shifts }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); }); await refreshManagerDashboard(); await prepareUserView(); } catch (error) { console.error("Error approving shift:", error); alert("Failed to approve: " + error); } }
@@ -361,16 +257,28 @@
         async function handleResetAllData() { if (confirm("This will clear your local session. Data in Firestore will NOT be deleted by this action. This action is primarily for development & testing. Are you sure?")) { loggedInCoworker = null; isManagerModeActive = false; localStorage.removeItem(ACTIVE_SESSION_USER_KEY); allShiftsData = {}; await initializeApp(); alert("Local session reset. App re-initialized data (may fetch from Firestore or use defaults if Firestore is empty)."); } }
 
         // --- Event Listeners ---
-        coworkerLoginBtn.addEventListener('click', handleCoworkerLogin); loginPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleCoworkerLogin(); }); accessManagerPanelBtn.addEventListener('click', handleAccessManagerPanel); userLogoutBtn.addEventListener('click', logout); unlockManagerPanelBtn.addEventListener('click', handleUnlockManagerPanel); masterManagerPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleUnlockManagerPanel(); }); cancelManagerUnlockBtn.addEventListener('click', () => managerUnlockModal.classList.add('hidden')); switchToUserViewBtn.addEventListener('click', () => { isManagerModeActive = false; changeMasterPasswordSection.classList.add('hidden'); showCorrectView(); }); managerDashboardLogoutBtn.addEventListener('click', logout);
+        coworkerLoginBtn.addEventListener('click', handleCoworkerLogin); 
+        loginPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleCoworkerLogin(); }); 
+        accessManagerPanelBtn.addEventListener('click', handleAccessManagerPanel); 
+        userLogoutBtn.addEventListener('click', logout); 
+        unlockManagerPanelBtn.addEventListener('click', handleUnlockManagerPanel); 
+        masterManagerPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleUnlockManagerPanel(); }); 
+        cancelManagerUnlockBtn.addEventListener('click', () => managerUnlockModal.classList.add('hidden')); 
+        switchToUserViewBtn.addEventListener('click', () => { isManagerModeActive = false; changeMasterPasswordSection.classList.add('hidden'); showCorrectView(); }); 
+        managerDashboardLogoutBtn.addEventListener('click', logout);
         prevWeekBtnMgr.addEventListener('click', () => { currentViewingDateMgr.setDate(currentViewingDateMgr.getDate() - 7); refreshManagerDashboard(); });
         jumpToTargetWeekBtnMgr.addEventListener('click', () => { currentViewingDateMgr = getNextWeekStartDate(); refreshManagerDashboard(); });
         nextWeekBtnMgr.addEventListener('click', () => { currentViewingDateMgr.setDate(currentViewingDateMgr.getDate() + 7); refreshManagerDashboard(); });
-        publishWeekBtn.addEventListener('click', handlePublishWeekToggle); showChangeMasterPassBtn.addEventListener('click', () => { changeMasterPasswordSection.classList.toggle('hidden'); changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; currentMasterPasswordInput.value = ""; newMasterPasswordInput.value = ""; confirmNewMasterPasswordInput.value = ""; }); submitChangeMasterPassBtn.addEventListener('click', handleSubmitChangeMasterPassword); cancelChangeMasterPassBtn.addEventListener('click', () => { changeMasterPasswordSection.classList.add('hidden'); changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; });
+        publishWeekBtn.addEventListener('click', handlePublishWeekToggle); 
+        showChangeMasterPassBtn.addEventListener('click', () => { changeMasterPasswordSection.classList.toggle('hidden'); changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; currentMasterPasswordInput.value = ""; newMasterPasswordInput.value = ""; confirmNewMasterPasswordInput.value = ""; }); 
+        submitChangeMasterPassBtn.addEventListener('click', handleSubmitChangeMasterPassword); 
+        cancelChangeMasterPassBtn.addEventListener('click', () => { changeMasterPasswordSection.classList.add('hidden'); changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; });
         hoursViewTypeSelect.addEventListener('change', () => refreshManagerDashboard());
         totalHoursPeriodSelect.addEventListener('change', () => refreshManagerDashboard());
-        resetAllDataBtn.addEventListener('click', handleResetAllData); addCoworkerBtn.addEventListener('click', handleAddCoworker); newCoworkerPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddCoworker(); });
+        resetAllDataBtn.addEventListener('click', handleResetAllData); 
+        addCoworkerBtn.addEventListener('click', handleAddCoworker); 
+        newCoworkerPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddCoworker(); });
         
-        // Event listeners for User Application Week Navigation
         if (prevUserAppWeekBtn) {
             prevUserAppWeekBtn.addEventListener('click', async () => {
                 const firstAllowedAppDate = getNextWeekStartDate();
@@ -384,8 +292,7 @@
             nextUserAppWeekBtn.addEventListener('click', async () => {
                 const firstAllowedAppDate = getNextWeekStartDate();
                 const lastAllowedAppDateBoundary = new Date(firstAllowedAppDate);
-                lastAllowedAppDateBoundary.setDate(firstAllowedAppDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7)); 
-
+                lastAllowedAppDateBoundary.setDate(firstAllowedAppDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7));
                 if (currentUserApplicationViewingDate && getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() < getMondayOfDate(new Date(lastAllowedAppDateBoundary)).getTime()) {
                     currentUserApplicationViewingDate.setDate(currentUserApplicationViewingDate.getDate() + 7);
                     await renderCurrentUserApplicationWeek();
