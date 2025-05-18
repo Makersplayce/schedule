@@ -105,13 +105,15 @@
                 margin-bottom: 15px; /* Space below scrolled table */
                 -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
             }
+            /*
             .table-responsive-wrapper table {
-                min-width: 600px; /* Or a value that suits your content before scrolling starts */
-                                  /* This prevents columns from becoming too squished */
+                 You can experiment with a small min-width if needed, e.g., min-width: 300px;
             }
+            */
+
             /* If you can't use the wrapper, table cells might need stacking, which is more complex */
             /* For example, to make action cells in tables more mobile-friendly: */
-            td.action-cell {
+            td.action-cell { /* This rule applies even without the wrapper for general action cell compactness */
                 min-width: 150px; /* Adjust if needed, or auto if stacking buttons */
             }
             td.action-cell select,
@@ -126,6 +128,42 @@
             td.action-cell hr {
                 display: none; /* Hide HR if elements stack neatly */
             }
+
+            /* Further table optimizations for mobile - NEWLY ADDED/REFINED */
+            .table-responsive-wrapper table th,
+            .table-responsive-wrapper table td {
+                padding: 4px 3px;     /* Reduce padding further in table cells */
+                font-size: 0.8em;     /* Smaller font in table cells */
+                line-height: 1.2;     /* Adjust line height for tighter rows */
+                white-space: nowrap;  /* Prevent text wrapping in most cells to keep rows compact. */
+            }
+
+            .table-responsive-wrapper table td.action-cell {
+                white-space: normal;  /* Override nowrap for this cell to allow buttons to stack */
+                min-width: 90px;     /* Allow action cell to be reasonably narrow, adjust as needed */
+            }
+
+            .table-responsive-wrapper table td.action-cell button.small-action,
+            .table-responsive-wrapper table td.action-cell select {
+                font-size: 0.7em;     /* Make action buttons/select text a bit smaller */
+                padding: 4px 5px;     /* Compact padding for action items */
+                margin-bottom: 4px;   /* Space between stacked items */
+            }
+            .table-responsive-wrapper table td.action-cell select {
+                max-width: 100%;      /* Ensure select takes full width within its constraints */
+                box-sizing: border-box;
+            }
+            .table-responsive-wrapper table td.action-cell button:last-child {
+                margin-bottom: 0;
+            }
+
+            .table-responsive-wrapper table .shift-description-display {
+                font-size: 0.7em;     /* Even smaller for descriptions within tables */
+                margin-top: 1px;
+                line-height: 1.1;
+                white-space: normal;  /* Allow description to wrap if it's long */
+            }
+            /* End of new/refined table styles */
 
 
             /* --- User Shift View --- */
@@ -358,7 +396,7 @@
             <div class="app-container">
                 <div id="latestPublishedScheduleSection" class="container hidden">
                     <h2 id="latestPublishedScheduleTitle">Latest Published Schedule</h2>
-                    <!-- Consider wrapping table below with <div class="table-responsive-wrapper"> -->
+                    <!-- IMPORTANT: Wrap table below with <div class="table-responsive-wrapper"> -->
                     <table id="latestPublishedScheduleTable"><thead><tr><th>Day</th><th>9:30 - 13:00</th><th>13:00 - 16:30</th></tr></thead><tbody></tbody></table>
                 </div>
                 <div id="userShiftView" class="container view-section">
@@ -369,7 +407,7 @@
                         <button id="nextUserAppWeekBtn" class="small-action">Next App Week »</button>
                     </div>
                     <h3>Available Shifts & Your Applications</h3>
-                    <!-- Consider wrapping table below with <div class="table-responsive-wrapper"> -->
+                    <!-- IMPORTANT: Wrap table below with <div class="table-responsive-wrapper"> -->
                     <table id="userShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time & Description</th><th>Status</th><th>Your Status / Assigned</th><th>Action</th></tr></thead><tbody></tbody></table>
                 </div>
                 <div id="myPastShiftsSection" class="container view-section hidden">
@@ -383,7 +421,7 @@
                         <button id="nextPastPeriodBtn" class="small-action">Next »</button>
                     </div>
                     <p style="text-align:center; font-size:0.9em;" id="myPastShiftsPeriodDisplay"></p>
-                    <!-- Consider wrapping table below with <div class="table-responsive-wrapper"> -->
+                    <!-- IMPORTANT: Wrap table below with <div class="table-responsive-wrapper"> -->
                     <table id="myPastShiftsTable">
                         <thead><tr><th>Date</th><th>Day</th><th>Time & Description</th></tr></thead>
                         <tbody></tbody>
@@ -431,17 +469,17 @@
                     </div>
 
                     <div class="manager-schedule-preview"><h3 id="managerSchedulePreviewTitle">Shift Schedule Preview: Week of [Date]</h3>
-                    <!-- Consider wrapping table below with <div class="table-responsive-wrapper"> -->
+                    <!-- IMPORTANT: Wrap table below with <div class="table-responsive-wrapper"> -->
                     <table id="managerSchedulePreviewTable" class="manager-schedule-preview-table"><thead><tr><th>Day</th><th>9:30 - 13:00</th><th>13:00 - 16:30</th></tr></thead><tbody></tbody></table></div>
                     <div class="manager-main-flex-row">
                         <div class="manager-applications-column"><h3>Shift Applications Management</h3><p style="text-align:center; font-size:0.9em;" id="managerApplicationWeekDisplay"></p>
-                        <!-- Consider wrapping table below with <div class="table-responsive-wrapper"> -->
+                        <!-- IMPORTANT: Wrap table below with <div class="table-responsive-wrapper"> -->
                         <table id="managerShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time & Description</th><th>Status</th><th>Applicants / Assigned</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
                         <div class="manager-hours-column"><h3>Hours Overview</h3><div class="input-group" style="margin-bottom:5px;"><select id="hoursViewTypeSelect"><option value="weekly">Weekly Hours</option><option value="monthly">Monthly Hours</option></select></div><div id="hoursOverviewList"></div></div>
                     </div>
                     <h3>Manage Coworkers</h3><div class="input-group"><label for="newCoworkerName">Add Name:</label><input type="text" id="newCoworkerName" placeholder="Coworker's name"><label for="newCoworkerPassword" style="margin-top:5px;">Set Password:</label><input type="password" id="newCoworkerPassword" placeholder="Initial password"><label style="margin-top:5px;"><input type="checkbox" id="newCoworkerIsManager"> Is Manager?</label><button id="addCoworkerBtn" style="margin-top:10px;">Add Coworker</button></div><div id="coworkerList"></div>
                     <div id="totalHoursSummarySection" class="container"><h3>Total Hours Summary per Coworker</h3><div class="input-group"><label for="totalHoursPeriodSelect" style="display:inline-block; margin-right:10px;">Select Period:</label><select id="totalHoursPeriodSelect"><option value="viewing_week">Currently Viewed Week</option><option value="viewing_month">Currently Viewed Month</option><option value="all_loaded">All Loaded Data</option></select></div>
-                    <!-- Consider wrapping table below with <div class="table-responsive-wrapper"> -->
+                    <!-- IMPORTANT: Wrap table below with <div class="table-responsive-wrapper"> -->
                     <table id="totalHoursSummaryTable"><thead><tr><th>Coworker</th><th>Total Approved Hours</th></tr></thead><tbody></tbody></table></div>
                 </div>
             </div>
