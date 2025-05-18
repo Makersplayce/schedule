@@ -60,7 +60,7 @@
         .status-available { color: green; font-weight: bold; }
         .status-pending { color: orange; font-weight: bold; }
         .status-approved { color: blue; font-weight: bold; }
-        .status-assigned { color: red; font-weight: bold; } /* MODIFIED: "Assigned" status in red and bold */
+        .status-assigned { color: red; font-weight: bold; }
         .hidden { display: none !important; }
         #scheduleOverviewTable td, .manager-schedule-preview-table td, #latestPublishedScheduleTable td {text-align: center;}
         #totalHoursSummaryTable td, #totalHoursSummaryTable th { text-align: left; font-size: 0.9em; }
@@ -81,288 +81,67 @@
         /* --- START OF MOBILE RESPONSIVE STYLES --- */
         @media (max-width: 768px) { /* Styles for screens 768px wide or less */
 
-            /* General Adjustments */
-            .main-content-area {
-                padding: 10px;
-            }
-            .app-container {
-                width: 95%;
-            }
-            .container {
-                padding: 15px;
-            }
+            .main-content-area { padding: 10px; }
+            .app-container { width: 95%; }
+            .container { padding: 15px; }
             h1 { font-size: 1.6em; }
             h2 { font-size: 1.4em; }
             h3 { font-size: 1.15em; }
-            button {
-                padding: 12px 15px;
-            }
-            button.small-action {
-                padding: 8px 10px;
-            }
-
-            .table-responsive-wrapper {
-                overflow-x: auto;
-                width: 100%;
-                margin-bottom: 15px;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            td.action-cell {
-                min-width: 150px;
-            }
-            td.action-cell select,
-            td.action-cell button {
-                width: 100% !important;
-                margin-bottom: 8px;
-                box-sizing: border-box;
-            }
-            td.action-cell button:last-child {
-                margin-bottom: 0;
-            }
-            td.action-cell hr {
-                display: none;
-            }
-
-            .table-responsive-wrapper table th,
-            .table-responsive-wrapper table td {
-                padding: 4px 3px;
-                font-size: 0.8em;
-                line-height: 1.2;
-                white-space: nowrap;
-            }
-
-            .table-responsive-wrapper table td.action-cell {
-                white-space: normal;
-                min-width: 90px;
-            }
-
-            .table-responsive-wrapper table td.action-cell button.small-action,
-            .table-responsive-wrapper table td.action-cell select {
-                font-size: 0.7em;
-                padding: 4px 5px;
-                margin-bottom: 4px;
-            }
-            .table-responsive-wrapper table td.action-cell select {
-                max-width: 100%;
-                box-sizing: border-box;
-            }
-            .table-responsive-wrapper table td.action-cell button:last-child {
-                margin-bottom: 0;
-            }
-
-            .table-responsive-wrapper table .shift-description-display {
-                font-size: 0.7em;
-                margin-top: 1px;
-                line-height: 1.1;
-                white-space: normal;
-            }
-
-            #userShiftViewWrapper .top-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            #userShiftViewWrapper .top-bar h2 {
-                text-align: left;
-                margin-bottom: 0;
-            }
-            #userShiftViewWrapper .top-bar div {
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 10px;
-                width: 100%;
-            }
-            #userShiftViewWrapper .top-bar div button {
-                flex-grow: 1;
-                min-width: 120px;
-            }
-
-            .week-navigation#userApplicationWeekNav {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 8px;
-            }
-            .week-navigation#userApplicationWeekNav button {
-                width: 80%;
-                max-width: 280px;
-            }
-            #myPastShiftsSection .week-navigation {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            #myPastShiftsSection .week-navigation select {
-                width: 80%;
-                max-width: 280px;
-            }
-
-            .manager-top-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-                padding: 10px 15px;
-            }
-            .manager-top-bar h1 {
-                font-size: 1.3em;
-                margin-bottom: 5px;
-            }
-            .manager-top-bar div {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-             .manager-top-bar div span#managerLoggedInAs {
-                margin-right: 0;
-                margin-bottom: 5px;
-            }
-            .manager-top-bar div button.small-action {
-                width: auto;
-                padding: 8px 12px;
-            }
-
-            .manager-body {
-                flex-direction: column;
-            }
-            .manager-sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #ddd;
-                margin-bottom: 15px;
-                max-height: none;
-                overflow-y: visible;
-            }
-            .manager-sidebar .week-navigation {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-around;
-                gap: 5px;
-            }
-            .manager-sidebar .week-navigation button.small-action {
-                flex-grow: 1;
-                min-width: 100px;
-            }
-            .manager-sidebar h4 {
-                margin-top: 15px;
-            }
-
-            .manager-main-content {
-                padding: 10px;
-            }
-            .manager-main-flex-row {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .manager-applications-column,
-            .manager-hours-column {
-                min-width: 100%;
-                flex-basis: auto;
-            }
-
-            .add-shift-section .input-group {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0;
-            }
-            .add-shift-section .input-group label {
-                margin-bottom: 5px;
-                margin-right: 0;
-                width: 100%;
-            }
-            .add-shift-section .input-group select,
-            .add-shift-section .input-group input[type="text"],
-            .add-shift-section .input-group input[type="time"] {
-                width: 100%;
-                min-width: 0;
-                margin-bottom: 10px;
-                box-sizing: border-box;
-            }
-            .add-shift-section .input-group input[type="text"]#addShiftDescriptionInput {
-                min-width: auto;
-            }
-            .coworker-checkbox-group {
-                width: 100%;
-            }
-            .coworker-checkbox-group label {
-                display: block;
-                margin-bottom: 8px;
-                margin-right: 0;
-            }
-            .add-shift-section button {
-                width: 100%;
-                margin-bottom: 5px;
-            }
-            .add-shift-section button:last-of-type {
-                margin-bottom: 0;
-            }
-
-            .manager-main-content > h3 + .input-group {
-                display: flex;
-                flex-direction: column;
-            }
-            .manager-main-content > h3 + .input-group label,
-            .manager-main-content > h3 + .input-group input[type="text"],
-            .manager-main-content > h3 + .input-group input[type="password"],
-            .manager-main-content > h3 + .input-group button {
-                width: 100% !important;
-                margin-top: 5px;
-                margin-bottom: 5px;
-                box-sizing: border-box;
-            }
-             .manager-main-content > h3 + .input-group label input[type="checkbox"] {
-                width: auto !important;
-                margin-right: 5px;
-            }
-
-            .coworker-management-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            .coworker-management-item span {
-                margin-bottom: 5px;
-            }
-            .coworker-management-item div {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 5px;
-            }
-
-            .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="text"],
-            .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="password"],
-            .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) select {
-                width: 100%;
-                box-sizing: border-box;
-            }
-
-            #changeMasterPasswordSection button {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            #changeMasterPasswordSection button.secondary {
-                margin-top: 0;
-            }
-
-            #managerUnlockModal > div {
-                width: 90%;
-                max-width: 350px;
-                padding: 20px;
-            }
-            #managerUnlockModal input[type="password"] {
-                width: calc(100% - 22px);
-            }
-            #managerUnlockModal button {
-                width: calc(50% - 5px);
-                margin-right: 5px;
-            }
-            #managerUnlockModal button:last-of-type {
-                margin-right: 0;
-            }
+            button { padding: 12px 15px; }
+            button.small-action { padding: 8px 10px; }
+            .table-responsive-wrapper { overflow-x: auto; width: 100%; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
+            td.action-cell { min-width: 150px; }
+            td.action-cell select, td.action-cell button { width: 100% !important; margin-bottom: 8px; box-sizing: border-box; }
+            td.action-cell button:last-child { margin-bottom: 0; }
+            td.action-cell hr { display: none; }
+            .table-responsive-wrapper table th, .table-responsive-wrapper table td { padding: 4px 3px; font-size: 0.8em; line-height: 1.2; white-space: nowrap; }
+            .table-responsive-wrapper table td.action-cell { white-space: normal; min-width: 90px; }
+            .table-responsive-wrapper table td.action-cell button.small-action, .table-responsive-wrapper table td.action-cell select { font-size: 0.7em; padding: 4px 5px; margin-bottom: 4px; }
+            .table-responsive-wrapper table td.action-cell select { max-width: 100%; box-sizing: border-box; }
+            .table-responsive-wrapper table td.action-cell button:last-child { margin-bottom: 0; }
+            .table-responsive-wrapper table .shift-description-display { font-size: 0.7em; margin-top: 1px; line-height: 1.1; white-space: normal; }
+            #userShiftViewWrapper .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+            #userShiftViewWrapper .top-bar h2 { text-align: left; margin-bottom: 0; }
+            #userShiftViewWrapper .top-bar div { display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; width: 100%; }
+            #userShiftViewWrapper .top-bar div button { flex-grow: 1; min-width: 120px; }
+            .week-navigation#userApplicationWeekNav { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+            .week-navigation#userApplicationWeekNav button { width: 80%; max-width: 280px; }
+            #myPastShiftsSection .week-navigation { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+            #myPastShiftsSection .week-navigation select { width: 80%; max-width: 280px; }
+            .manager-top-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 10px 15px; }
+            .manager-top-bar h1 { font-size: 1.3em; margin-bottom: 5px; }
+            .manager-top-bar div { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+            .manager-top-bar div span#managerLoggedInAs { margin-right: 0; margin-bottom: 5px; }
+            .manager-top-bar div button.small-action { width: auto; padding: 8px 12px; }
+            .manager-body { flex-direction: column; }
+            .manager-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #ddd; margin-bottom: 15px; max-height: none; overflow-y: visible; }
+            .manager-sidebar .week-navigation { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 5px; }
+            .manager-sidebar .week-navigation button.small-action { flex-grow: 1; min-width: 100px; }
+            .manager-sidebar h4 { margin-top: 15px; }
+            .manager-main-content { padding: 10px; }
+            .manager-main-flex-row { flex-direction: column; gap: 15px; }
+            .manager-applications-column, .manager-hours-column { min-width: 100%; flex-basis: auto; }
+            .add-shift-section .input-group { flex-direction: column; align-items: stretch; gap: 0; }
+            .add-shift-section .input-group label { margin-bottom: 5px; margin-right: 0; width: 100%; }
+            .add-shift-section .input-group select, .add-shift-section .input-group input[type="text"], .add-shift-section .input-group input[type="time"] { width: 100%; min-width: 0; margin-bottom: 10px; box-sizing: border-box; }
+            .add-shift-section .input-group input[type="text"]#addShiftDescriptionInput { min-width: auto; }
+            .coworker-checkbox-group { width: 100%; }
+            .coworker-checkbox-group label { display: block; margin-bottom: 8px; margin-right: 0; }
+            .add-shift-section button { width: 100%; margin-bottom: 5px; }
+            .add-shift-section button:last-of-type { margin-bottom: 0; }
+            .manager-main-content > h3 + .input-group { display: flex; flex-direction: column; }
+            .manager-main-content > h3 + .input-group label, .manager-main-content > h3 + .input-group input[type="text"], .manager-main-content > h3 + .input-group input[type="password"], .manager-main-content > h3 + .input-group button { width: 100% !important; margin-top: 5px; margin-bottom: 5px; box-sizing: border-box; }
+            .manager-main-content > h3 + .input-group label input[type="checkbox"] { width: auto !important; margin-right: 5px; }
+            .coworker-management-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .coworker-management-item span { margin-bottom: 5px; }
+            .coworker-management-item div { display: flex; flex-wrap: wrap; gap: 5px; }
+            .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="text"], .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="password"], .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) select { width: 100%; box-sizing: border-box; }
+            #changeMasterPasswordSection button { width: 100%; margin-bottom: 10px; }
+            #changeMasterPasswordSection button.secondary { margin-top: 0; }
+            #managerUnlockModal > div { width: 90%; max-width: 350px; padding: 20px; }
+            #managerUnlockModal input[type="password"] { width: calc(100% - 22px); }
+            #managerUnlockModal button { width: calc(50% - 5px); margin-right: 5px; }
+            #managerUnlockModal button:last-of-type { margin-right: 0; }
         }
         /* --- END OF MOBILE RESPONSIVE STYLES --- */
     </style>
@@ -605,118 +384,32 @@
         const cancelEditShiftBtn = document.getElementById('cancelEditShiftBtn');
         const assignCoworkersForCustomShiftDiv = document.getElementById('assignCoworkersForCustomShift');
 
-        // CUSTOM MODAL JS START
         const customAlertModal = document.getElementById('customAlertModal');
         const customAlertTitle = document.getElementById('customAlertTitle');
         const customAlertMessage = document.getElementById('customAlertMessage');
         const customAlertOkBtn = document.getElementById('customAlertOkBtn');
-
         const customConfirmModal = document.getElementById('customConfirmModal');
         const customConfirmTitle = document.getElementById('customConfirmTitle');
         const customConfirmMessage = document.getElementById('customConfirmMessage');
         const customConfirmYesBtn = document.getElementById('customConfirmYesBtn');
         const customConfirmNoBtn = document.getElementById('customConfirmNoBtn');
-
         const customPromptModal = document.getElementById('customPromptModal');
         const customPromptTitle = document.getElementById('customPromptTitle');
         const customPromptMessage = document.getElementById('customPromptMessage');
         const customPromptInput = document.getElementById('customPromptInput');
         const customPromptOkBtn = document.getElementById('customPromptOkBtn');
         const customPromptCancelBtn = document.getElementById('customPromptCancelBtn');
-
         let currentConfirmResolve = null;
         let currentPromptResolve = null;
 
-        function showAlert(message, title = "Alert") {
-            customAlertTitle.textContent = title;
-            customAlertMessage.textContent = message;
-            customAlertModal.classList.remove('hidden');
-            customAlertModal.style.display = 'flex';
-            return new Promise((resolve) => {
-                customAlertOkBtn.onclick = () => {
-                    customAlertModal.classList.add('hidden');
-                    customAlertModal.style.display = 'none';
-                    resolve(true);
-                };
-            });
-        }
-
-        function showConfirm(message, title = "Confirm") {
-            customConfirmTitle.textContent = title;
-            customConfirmMessage.textContent = message;
-            customConfirmModal.classList.remove('hidden');
-            customConfirmModal.style.display = 'flex';
-            return new Promise((resolve) => {
-                currentConfirmResolve = resolve;
-            });
-        }
-
-        function showPrompt(message, defaultValue = "", title = "Prompt") {
-            customPromptTitle.textContent = title;
-            customPromptMessage.textContent = message;
-            customPromptInput.value = defaultValue;
-            customPromptModal.classList.remove('hidden');
-            customPromptModal.style.display = 'flex';
-            customPromptInput.focus();
-            return new Promise((resolve) => {
-                currentPromptResolve = resolve;
-            });
-        }
-
-        if (customAlertOkBtn) {
-             customAlertOkBtn.addEventListener('click', () => {
-                if (!customAlertModal.classList.contains('hidden')) {
-                    customAlertModal.classList.add('hidden');
-                    customAlertModal.style.display = 'none';
-                }
-            });
-        }
-
-        if (customConfirmYesBtn) {
-            customConfirmYesBtn.addEventListener('click', () => {
-                customConfirmModal.classList.add('hidden');
-                customConfirmModal.style.display = 'none';
-                if (currentConfirmResolve) {
-                    currentConfirmResolve(true);
-                    currentConfirmResolve = null;
-                }
-            });
-        }
-
-        if (customConfirmNoBtn) {
-            customConfirmNoBtn.addEventListener('click', () => {
-                customConfirmModal.classList.add('hidden');
-                customConfirmModal.style.display = 'none';
-                if (currentConfirmResolve) {
-                    currentConfirmResolve(false);
-                    currentConfirmResolve = null;
-                }
-            });
-        }
-
-        if (customPromptOkBtn) {
-            customPromptOkBtn.addEventListener('click', () => {
-                customPromptModal.classList.add('hidden');
-                customPromptModal.style.display = 'none';
-                if (currentPromptResolve) {
-                    currentPromptResolve(customPromptInput.value);
-                    currentPromptResolve = null;
-                }
-            });
-        }
-
-        if (customPromptCancelBtn) {
-            customPromptCancelBtn.addEventListener('click', () => {
-                customPromptModal.classList.add('hidden');
-                customPromptModal.style.display = 'none';
-                if (currentPromptResolve) {
-                    currentPromptResolve(null);
-                    currentPromptResolve = null;
-                }
-            });
-        }
-        // CUSTOM MODAL JS END
-
+        function showAlert(message, title = "Alert") { customAlertTitle.textContent = title; customAlertMessage.textContent = message; customAlertModal.classList.remove('hidden'); customAlertModal.style.display = 'flex'; return new Promise((resolve) => { customAlertOkBtn.onclick = () => { customAlertModal.classList.add('hidden'); customAlertModal.style.display = 'none'; resolve(true); }; }); }
+        function showConfirm(message, title = "Confirm") { customConfirmTitle.textContent = title; customConfirmMessage.textContent = message; customConfirmModal.classList.remove('hidden'); customConfirmModal.style.display = 'flex'; return new Promise((resolve) => { currentConfirmResolve = resolve; }); }
+        function showPrompt(message, defaultValue = "", title = "Prompt") { customPromptTitle.textContent = title; customPromptMessage.textContent = message; customPromptInput.value = defaultValue; customPromptModal.classList.remove('hidden'); customPromptModal.style.display = 'flex'; customPromptInput.focus(); return new Promise((resolve) => { currentPromptResolve = resolve; }); }
+        if (customAlertOkBtn) { customAlertOkBtn.addEventListener('click', () => { if (!customAlertModal.classList.contains('hidden')) { customAlertModal.classList.add('hidden'); customAlertModal.style.display = 'none'; } }); }
+        if (customConfirmYesBtn) { customConfirmYesBtn.addEventListener('click', () => { customConfirmModal.classList.add('hidden'); customConfirmModal.style.display = 'none'; if (currentConfirmResolve) { currentConfirmResolve(true); currentConfirmResolve = null; } }); }
+        if (customConfirmNoBtn) { customConfirmNoBtn.addEventListener('click', () => { customConfirmModal.classList.add('hidden'); customConfirmModal.style.display = 'none'; if (currentConfirmResolve) { currentConfirmResolve(false); currentConfirmResolve = null; } }); }
+        if (customPromptOkBtn) { customPromptOkBtn.addEventListener('click', () => { customPromptModal.classList.add('hidden'); customPromptModal.style.display = 'none'; if (currentPromptResolve) { currentPromptResolve(customPromptInput.value); currentPromptResolve = null; } }); }
+        if (customPromptCancelBtn) { customPromptCancelBtn.addEventListener('click', () => { customPromptModal.classList.add('hidden'); customPromptModal.style.display = 'none'; if (currentPromptResolve) { currentPromptResolve(null); currentPromptResolve = null; } }); }
 
         function getMondayOfDate(d) { d = new Date(d); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); monday.setHours(0,0,0,0); return monday; }
         function getNextWeekStartDate(fromDate) { const baseDate = fromDate ? new Date(fromDate) : new Date(); const monday = getMondayOfDate(baseDate); monday.setDate(monday.getDate() + 7); return monday; }
@@ -729,7 +422,7 @@
         async function ensureFirebaseAnonymousAuth() { if (!auth.currentUser) { try { await auth.signInAnonymously(); } catch (error) { console.error("Critical Firebase Anonymous Auth Error on initial ensure:", error); if(initialLoginViewWrapper && !initialLoginViewWrapper.classList.contains('hidden')){ initialLoginError.textContent = "Critical error: Could not establish secure session.";} else { await showAlert("Critical error: Could not establish secure session.");} throw error;}}}
         async function initializeApp() { try { await ensureFirebaseAnonymousAuth(); await loadMasterPassword(); currentViewingDateMgr = getNextWeekStartDate(); currentPastShiftViewDate = getMondayOfDate(new Date()); currentUserApplicationViewingDate = getNextWeekStartDate(); await initializeCoworkers(); populateLoginUserDropdown(); populateCoworkerCheckboxesForCustomShift(); await checkActiveSession(); resetAddShiftForm(); } catch (error) { console.error("Error during app initialization:", error); if(initialLoginError && typeof initialLoginError.textContent !== 'undefined') { initialLoginError.textContent = "Failed to initialize. Check console, or refresh.";}}}
         async function loadMasterPassword() { try { const configRef = db.collection('config').doc('adminConfig'); let doc; try { doc = await configRef.get(); } catch (readError) { console.warn("Reading adminConfig failed (expected if rules are 'allow read: if false;'). Using default master password."); } if (doc && doc.exists && doc.data().masterAdminPassword) { currentMasterPassword = doc.data().masterAdminPassword; } else { console.warn("Admin config or master password not found or not readable. Using default and attempting to save (if rules permit)."); currentMasterPassword = DEFAULT_MASTER_PASSWORD; try { await configRef.set({ masterAdminPassword: DEFAULT_MASTER_PASSWORD }, { merge: true }); console.log("Default master password written/updated in Firestore config."); } catch (setConfigError) { console.error("Could not save default master password to Firestore (check rules for config/adminConfig create/update):", setConfigError); } } } catch (error) { console.error("Error in loadMasterPassword logic:", error); currentMasterPassword = DEFAULT_MASTER_PASSWORD; } }
-        async function getWeekData(weekStartDate) { const weekKey = getWeekKey(weekStartDate); if (allShiftsData[weekKey]) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts) && typeof allShiftsData[weekKey].isPublished === 'boolean') { sortShiftsArray(allShiftsData[weekKey].shifts); return JSON.parse(JSON.stringify(allShiftsData[weekKey])); } else { delete allShiftsData[weekKey]; } } const weekDocRef = db.collection('shifts').doc(weekKey); try { const doc = await weekDocRef.get(); if (doc.exists) { let data = doc.data(); if (typeof data !== 'object' || data === null) data = {}; if (!Array.isArray(data.shifts)) { data.shifts = []; } if (typeof data.isPublished !== 'boolean') { data.isPublished = false; } data.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; if (s && !Array.isArray(s.assignedCoworkers)) s.assignedCoworkers = []; if (s && !s.description && standardShiftTimes.includes(s.time)) { s.description = "Normal Shift"; } /* Add default description */ }); sortShiftsArray(data.shifts); allShiftsData[weekKey] = JSON.parse(JSON.stringify(data)); return data; } else { const newWeekShifts = []; let idCounter = Date.now(); for (let i = 0; i < workDays.length; i++) { const dayName = workDays[i]; const currentShiftDate = new Date(weekStartDate); currentShiftDate.setDate(weekStartDate.getDate() + i); standardShiftTimes.forEach(time => { newWeekShifts.push({ id: `${weekKey}-${idCounter++}`, day: dayName, date: currentShiftDate.toISOString(), time: time, status: "available", applicants: [], applicantName: "", description: "Normal Shift", assignedCoworkers: [] }); /* Add default description */ }); } const newWeekData = { shifts: newWeekShifts, isPublished: false }; sortShiftsArray(newWeekData.shifts); await weekDocRef.set(newWeekData); allShiftsData[weekKey] = JSON.parse(JSON.stringify(newWeekData)); return newWeekData; } } catch (error) { console.error(`Error getting week data for ${weekKey}:`, error); const fallbackData = { shifts: [], isPublished: false, error: true, errorMessage: error.message }; allShiftsData[weekKey] = JSON.parse(JSON.stringify(fallbackData)); return fallbackData; } }
+        async function getWeekData(weekStartDate) { const weekKey = getWeekKey(weekStartDate); if (allShiftsData[weekKey]) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts) && typeof allShiftsData[weekKey].isPublished === 'boolean') { sortShiftsArray(allShiftsData[weekKey].shifts); return JSON.parse(JSON.stringify(allShiftsData[weekKey])); } else { delete allShiftsData[weekKey]; } } const weekDocRef = db.collection('shifts').doc(weekKey); try { const doc = await weekDocRef.get(); if (doc.exists) { let data = doc.data(); if (typeof data !== 'object' || data === null) data = {}; if (!Array.isArray(data.shifts)) { data.shifts = []; } if (typeof data.isPublished !== 'boolean') { data.isPublished = false; } data.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; if (s && !Array.isArray(s.assignedCoworkers)) s.assignedCoworkers = []; if (s && !s.description && standardShiftTimes.includes(s.time)) { s.description = "Normal Shift"; } }); sortShiftsArray(data.shifts); allShiftsData[weekKey] = JSON.parse(JSON.stringify(data)); return data; } else { const newWeekShifts = []; let idCounter = Date.now(); for (let i = 0; i < workDays.length; i++) { const dayName = workDays[i]; const currentShiftDate = new Date(weekStartDate); currentShiftDate.setDate(weekStartDate.getDate() + i); standardShiftTimes.forEach(time => { newWeekShifts.push({ id: `${weekKey}-${idCounter++}`, day: dayName, date: currentShiftDate.toISOString(), time: time, status: "available", applicants: [], applicantName: "", description: "Normal Shift", assignedCoworkers: [] }); }); } const newWeekData = { shifts: newWeekShifts, isPublished: false }; sortShiftsArray(newWeekData.shifts); await weekDocRef.set(newWeekData); allShiftsData[weekKey] = JSON.parse(JSON.stringify(newWeekData)); return newWeekData; } } catch (error) { console.error(`Error getting week data for ${weekKey}:`, error); const fallbackData = { shifts: [], isPublished: false, error: true, errorMessage: error.message }; allShiftsData[weekKey] = JSON.parse(JSON.stringify(fallbackData)); return fallbackData; } }
         async function getShiftsForWeek(weekStartDate) { const weekData = await getWeekData(weekStartDate); return weekData; }
         async function initializeCoworkers() { try { const snapshot = await db.collection('coworkers').get(); if (snapshot.empty) { coworkers = [ { name: "Ties", password: "1234", isManager: true }, { name: "Joep", password: "1234", isManager: false }, { name: "Jesper", password: "1234", isManager: false }, { name: "Inti", password: "1234", isManager: false }, { name: "Martijn", password: "1234", isManager: false }, { name: "Mathijs", password: "1234", isManager: false }, { name: "Dominik", password: "1234", isManager: false }, { name: "Jippe", password: "1234", isManager: false }, { name: "Zeynep", password: "1234", isManager: false } ]; const batch = db.batch(); coworkers.forEach(cw => { const docRef = db.collection('coworkers').doc(cw.name); batch.set(docRef, cw); }); await batch.commit(); } else { coworkers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); } } catch (error) { console.error("Error initializing coworkers:", error); coworkers = []; throw error; } }
         function showCorrectView() { [initialLoginViewWrapper, userShiftViewWrapper, managerDashboardView, managerUnlockModal, changeMasterPasswordSection, myPastShiftsSection, customAlertModal, customConfirmModal, customPromptModal].forEach(v => { if(v) v.classList.add('hidden'); }); if (isManagerModeActive && loggedInCoworker && loggedInCoworker.isManager) { managerDashboardView.classList.remove('hidden'); managerLoggedInAs.textContent = `Logged in as: ${loggedInCoworker.name}`; refreshManagerDashboard(); } else if (loggedInCoworker) { userShiftViewWrapper.classList.remove('hidden'); prepareUserView(); } else { initialLoginViewWrapper.classList.remove('hidden'); } }
@@ -756,7 +449,7 @@
                 timeCell.textContent = shift.time;
                 
                 const effectiveDescription = (!shift.description && standardShiftTimes.includes(shift.time)) ? "Normal Shift" : shift.description;
-                if (effectiveDescription) { // Display if there's any description (default or custom)
+                if (effectiveDescription) {
                     const descSpan = document.createElement('span');
                     descSpan.classList.add('shift-description-display');
                     descSpan.textContent = effectiveDescription;
@@ -770,6 +463,9 @@
                 const isMyAppPending = shift.status === 'pending' && Array.isArray(shift.applicants) && shift.applicants.includes(loggedInCoworker.name);
                 const isApprovedForMe = shift.status === 'approved' && Array.isArray(shift.assignedCoworkers) && shift.assignedCoworkers.includes(loggedInCoworker.name);
                 const isApprovedForSomeoneElse = shift.status === 'approved' && Array.isArray(shift.assignedCoworkers) && shift.assignedCoworkers.length > 0 && !shift.assignedCoworkers.includes(loggedInCoworker.name);
+                // Check if the shift is available or pending (by anyone) but not yet assigned to the current user
+                const canIStillApply = shift.status === 'available' || (shift.status === 'pending' && !isMyAppPending && !isApprovedForMe);
+
 
                 if (isApprovedForMe) {
                     statusCell.textContent = "Approved";
@@ -787,8 +483,8 @@
                     statusCell.textContent = "Assigned";
                     statusCell.className = 'status-assigned';
                     actionCell.textContent = "---";
-                } else if (shift.status === 'available') {
-                    statusCell.textContent = "Available";
+                } else if (canIStillApply) { // This includes 'available' and 'pending by others'
+                    statusCell.textContent = "Available"; // Show as "Available" to the current user
                     statusCell.className = 'status-available';
                     const applyButton = document.createElement('button');
                     applyButton.textContent = "Apply";
@@ -796,6 +492,7 @@
                     applyButton.onclick = () => applyForShift(shift.id, getWeekKey(forWeekDate));
                     actionCell.appendChild(applyButton);
                 } else {
+                    // Fallback or if shift status is 'approved' but assignedCoworkers is empty (should ideally not happen)
                     statusCell.textContent = shift.status.charAt(0).toUpperCase() + shift.status.slice(1);
                     statusCell.className = `status-${shift.status}`;
                     actionCell.textContent = "---";
@@ -814,13 +511,13 @@
                 const row = managerShiftsTableBody.insertRow();
                 row.insertCell().textContent = shift.day;
                 row.insertCell().textContent = formatDate(new Date(shift.date), false);
-                const timeCell = row.insertCell(); timeCell.textContent = shift.time; 
+                const timeCell = row.insertCell(); timeCell.textContent = shift.time;
                 const effectiveDescription = (!shift.description && standardShiftTimes.includes(shift.time)) ? "Normal Shift" : shift.description;
-                if (effectiveDescription) { 
-                    const descSpan = document.createElement('span'); 
-                    descSpan.classList.add('shift-description-display'); 
-                    descSpan.textContent = effectiveDescription; 
-                    timeCell.appendChild(descSpan); 
+                if (effectiveDescription) {
+                    const descSpan = document.createElement('span');
+                    descSpan.classList.add('shift-description-display');
+                    descSpan.textContent = effectiveDescription;
+                    timeCell.appendChild(descSpan);
                 }
                 const statusCell = row.insertCell(); statusCell.textContent = shift.status.charAt(0).toUpperCase() + shift.status.slice(1); statusCell.className = `status-${shift.status}`;
                 let applicantDisplay = "---";
@@ -829,7 +526,7 @@
                 row.insertCell().textContent = applicantDisplay;
                 const actionCell = row.insertCell(); actionCell.classList.add("action-cell"); const weekKey = getWeekKey(new Date(shift.date));
 
-                if (shift.status === "pending" && Array.isArray(shift.applicants) && shift.applicants.length > 0) { const applicantSelect = document.createElement('select'); applicantSelect.id = `select-pending-${shift.id}`; shift.applicants.forEach(appName => { const option = document.createElement('option'); option.value = appName; option.textContent = appName; applicantSelect.appendChild(option); }); actionCell.appendChild(applicantSelect); const approveSelectedBtn = document.createElement('button'); approveSelectedBtn.textContent = "Approve Sel."; approveSelectedBtn.classList.add("approve", "small-action"); approveSelectedBtn.onclick = () => { const selectedName = document.getElementById(`select-pending-${shift.id}`).value; managerApproveSelectedApplicant(shift.id, weekKey, selectedName); }; actionCell.appendChild(approveSelectedBtn); const denyAllBtn = document.createElement('button'); denyAllBtn.textContent = "Deny All"; denyAllBtn.classList.add("deny", "small-action"); denyAllBtn.style.marginLeft = "5px"; denyAllBtn.onclick = () => managerDenyAllApplicants(shift.id, weekKey); actionCell.appendChild(denyAllBtn); }
+                if (shift.status === "pending" && Array.isArray(shift.applicants) && shift.applicants.length > 0) { const applicantSelect = document.createElement('select'); applicantSelect.id = `select-pending-${shift.id}`; shift.applicants.forEach(appName => { const option = document.createElement('option'); option.value = appName; option.textContent = appName; applicantSelect.appendChild(option); }); actionCell.appendChild(applicantSelect); const approveSelectedBtn = document.createElement('button'); approveSelectedBtn.textContent = "Approve Sel."; approveSelectedBtn.classList.add("approve", "small-action"); approveSelectedBtn.onclick = async () => { const selectedName = document.getElementById(`select-pending-${shift.id}`).value; await managerApproveSelectedApplicant(shift.id, weekKey, selectedName); }; actionCell.appendChild(approveSelectedBtn); const denyAllBtn = document.createElement('button'); denyAllBtn.textContent = "Deny All"; denyAllBtn.classList.add("deny", "small-action"); denyAllBtn.style.marginLeft = "5px"; denyAllBtn.onclick = async () => await managerDenyAllApplicants(shift.id, weekKey); actionCell.appendChild(denyAllBtn); }
                 else if (shift.status === "approved") {
                     const editAssignmentsBtn = document.createElement('button');
                     editAssignmentsBtn.textContent = "Edit/Clear Assign.";
@@ -859,7 +556,7 @@
         function resetAddShiftForm() { editingShiftId = null; if(addUpdateShiftTitle) addUpdateShiftTitle.textContent = "Add New Shift to Current Week"; if(managerAddShiftBtn) managerAddShiftBtn.textContent = "Add Shift"; if(cancelEditShiftBtn) cancelEditShiftBtn.classList.add('hidden'); if(addShiftDaySelect) addShiftDaySelect.value = "Monday"; if(addShiftTimeTypeSelect) addShiftTimeTypeSelect.value = standardShiftTimes[0]; if(addShiftCustomStartTimeInput) addShiftCustomStartTimeInput.value = ""; if(addShiftCustomEndTimeInput) addShiftCustomEndTimeInput.value = ""; if(addShiftDescriptionInput) addShiftDescriptionInput.value = ""; if(customTimeInputsDiv) customTimeInputsDiv.classList.add('hidden'); if(descriptionInputGroup) descriptionInputGroup.classList.add('hidden'); if(assignCoworkersForCustomShiftDiv) { assignCoworkersForCustomShiftDiv.classList.add('hidden'); assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false); } }
         function managerEditShiftAssignments(shiftToEdit) { editingShiftId = shiftToEdit.id; addUpdateShiftTitle.textContent = "Update Shift Details / Assignments"; managerAddShiftBtn.textContent = "Update Shift"; cancelEditShiftBtn.classList.remove('hidden'); addShiftDaySelect.value = shiftToEdit.day; const isCustom = isCustomTimeShift(shiftToEdit.time); addShiftTimeTypeSelect.value = isCustom ? "custom" : shiftToEdit.time; customTimeInputsDiv.classList.toggle('hidden', !isCustom); descriptionInputGroup.classList.toggle('hidden', !isCustom);
             assignCoworkersForCustomShiftDiv.classList.remove('hidden');
-            if (isCustom) { const [startTime, endTime] = shiftToEdit.time.split(' - '); addShiftCustomStartTimeInput.value = startTime || ""; addShiftCustomEndTimeInput.value = endTime || ""; addShiftDescriptionInput.value = shiftToEdit.description || ""; } else { addShiftDescriptionInput.value = ""; } // For standard shifts, clear description box when editing
+            if (isCustom) { const [startTime, endTime] = shiftToEdit.time.split(' - '); addShiftCustomStartTimeInput.value = startTime || ""; addShiftCustomEndTimeInput.value = endTime || ""; addShiftDescriptionInput.value = shiftToEdit.description || ""; } else { addShiftDescriptionInput.value = ""; } 
             const currentAssignees = shiftToEdit.assignedCoworkers && shiftToEdit.assignedCoworkers.length > 0 ? shiftToEdit.assignedCoworkers : (shiftToEdit.applicantName ? [shiftToEdit.applicantName] : []);
             assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = currentAssignees.includes(cb.value); });
             addShiftDaySelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -883,7 +580,7 @@
                 shiftTimeStr = `${startTime} - ${endTime}`;
             } else {
                 shiftTimeStr = timeType;
-                if (!description) { description = "Normal Shift"; } // Default for standard shifts
+                if (!description) { description = "Normal Shift"; } 
             }
             if (!assignCoworkersForCustomShiftDiv.classList.contains('hidden')) {
                 const checkboxes = assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]:checked');
