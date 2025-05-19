@@ -1,21 +1,3 @@
-Understood! My apologies if the previous "Custom Shifts Preview" for the manager and the "Custom Shifts & Events" for the user weren't fully separated out or if the `renderUserShifts` was still trying to put everything into one table initially.
-
-This version will ensure:
-
-1.  **Custom Shift Modal Closes:** The custom shift creation modal closes before the success alert.
-2.  **Manager Panel - Custom Shifts Preview:**
-    *   Approved custom shifts for the selected week will appear in their own dedicated table (`managerCustomShiftsPreviewTable`) below the standard schedule preview.
-3.  **Manager Panel - Shift Applications Management:**
-    *   All shifts (standard and custom) for the selected week will appear in the `managerShiftsTable` for management (approving, assigning via modal, etc.).
-4.  **User View - Available Shifts & Your Applications:**
-    *   Standard shifts will appear in `userShiftsTable`.
-    *   Custom shifts/events will appear in a separate dedicated table `userCustomShiftsTable` below the standard one.
-
-I've carefully reviewed and modified the `renderScheduleOverview` (for manager preview) and `renderUserShifts` functions to correctly direct standard vs. custom shifts to their respective tables.
-
-Here's the complete, updated `index.html`:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
