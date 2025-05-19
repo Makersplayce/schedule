@@ -882,9 +882,17 @@
         async function handleDeleteCoworker(coworkerDocIdOrName) {
             const coworkerToDelete = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToDelete) { await showAlert("Coworker not found."); return;}
-            if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) { await showAlert("Cannot delete the last manager."); return; }
+
+            // --- REVISED Safeguard Start ---
+            if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) {
+                await showAlert("Action Denied: Cannot delete the last manager. The system requires at least one manager account.");
+                return; // Prevent deletion
+            }
+            // --- REVISED Safeguard End ---
+
             const doDelete = await showConfirm(`Delete ${coworkerToDelete.name}? This will also remove their assignments and applications.`);
             if (!doDelete) return;
+            
             try {
                 await db.collection('coworkers').doc(coworkerToDelete.id || coworkerToDelete.name).delete();
                 const shiftsCollectionRef = db.collection('shifts');
@@ -906,7 +914,7 @@
                     if (weekModified) { batch.update(shiftsCollectionRef.doc(weekKey), { shifts: updatedShifts }); changesMadeToShifts = true; if (allShiftsData[weekKey]) { allShiftsData[weekKey].shifts = updatedShifts.map(s => JSON.parse(JSON.stringify(s)));} }
                 });
                 if (changesMadeToShifts) { await batch.commit(); }
-                await initializeCoworkers();
+                await initializeCoworkers(); 
                 populateLoginUserDropdown();
                 populateCoworkerCheckboxesForCustomShift();
                 if (loggedInCoworker && loggedInCoworker.name === coworkerToDelete.name) logout();
@@ -917,6 +925,7 @@
                 await showAlert("Failed to delete: " + error.message);
             }
         }
+
         async function handleChangeCoworkerPassword(coworkerDocIdOrName) {
             const newPassword = await showPrompt(`Enter new password for this coworker:`);
             if (newPassword === null) return;
@@ -935,15 +944,25 @@
                 await showAlert("Failed to change: " + error.message);
             }
         }
+
         async function handleToggleManagerStatus(coworkerDocIdOrName) {
             const coworkerToToggle = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToToggle) return;
             const newManagerStatus = !coworkerToToggle.isManager;
-            if (coworkerToToggle.isManager && coworkers.filter(c => c.isManager).length <= 1) { await showAlert("Cannot demote the last manager."); return; }
+
+            // --- REVISED Safeguard Start ---
+            // If demoting (newManagerStatus is false) AND this is the last manager
+            if (coworkerToToggle.isManager && newManagerStatus === false && coworkers.filter(c => c.isManager).length <= 1) {
+                await showAlert("Action Denied: Cannot demote the last manager. The system requires at least one manager account.");
+                return; // Prevent demotion
+            }
+            // --- REVISED Safeguard End ---
+            
             try {
                 await db.collection('coworkers').doc(coworkerDocIdOrName).update({ isManager: newManagerStatus });
-                coworkerToToggle.isManager = newManagerStatus;
-                renderCoworkerListForManager();
+                coworkerToToggle.isManager = newManagerStatus; // Update local array immediately
+                // No need to call initializeCoworkers() just for this, re-rendering the list is enough
+                renderCoworkerListForManager(); 
                 if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) {
                     loggedInCoworker.isManager = newManagerStatus;
                     accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
