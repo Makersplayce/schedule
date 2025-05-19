@@ -205,7 +205,7 @@
                     <div id="changeMasterPasswordSection" class="container hidden" style="border: 1px solid #ffc107; background: #fff9e6;"><h3>Change Master Admin Password</h3><div class="input-group"><label for="currentMasterPassword">Current Master Password:</label><input type="password" id="currentMasterPassword"></div><div class="input-group"><label for="newMasterPassword">New Master Password:</label><input type="password" id="newMasterPassword"></div><div class="input-group"><label for="confirmNewMasterPassword">Confirm New Password:</label><input type="password" id="confirmNewMasterPassword"></div><button id="submitChangeMasterPassBtn">Change Password</button><button id="cancelChangeMasterPassBtn" class="secondary">Cancel</button><p id="changeMasterPassError" class="error-message"></p><p id="changeMasterPassSuccess" class="success-message"></p></div>
 
                     <div class="add-shift-section container">
-                        <h3 id="addUpdateShiftTitle">Add New Shift to Selected Week</h3> <!-- MODIFIED TEXT -->
+                        <h3 id="addUpdateShiftTitle">Add New Shift to Selected Week</h3>
                         <div class="input-group">
                             <label for="addShiftDaySelect">Day:</label>
                             <select id="addShiftDaySelect">
@@ -243,7 +243,7 @@
                     <div class="manager-main-flex-row">
                         <div class="manager-applications-column"><h3>Shift Applications Management</h3><p style="text-align:center; font-size:0.9em;" id="managerApplicationWeekDisplay"></p>
                             <div class="table-responsive-wrapper">
-                                <table id="managerShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time & Description</th><th>Status</th><th>Applicants</th><th>Actions</th></tr></thead><tbody></tbody></table> <!-- MODIFIED HEADER -->
+                                <table id="managerShiftsTable"><thead><tr><th>Day</th><th>Date</th><th>Time & Description</th><th>Status</th><th>Applicants</th><th>Actions</th></tr></thead><tbody></tbody></table>
                             </div>
                         </div>
                         <div class="manager-hours-column"><h3>Hours Overview</h3><div class="input-group" style="margin-bottom:5px;"><select id="hoursViewTypeSelect"><option value="weekly">Weekly Hours</option><option value="monthly">Monthly Hours</option></select></div><div id="hoursOverviewList"></div></div>
@@ -327,8 +327,8 @@
         let allShiftsData = {};
         let currentPastShiftViewDate;
         let currentUserApplicationViewingDate;
-        let editingShiftId = null; 
-        let currentShiftForModal = null; 
+        let editingShiftId = null;
+        let currentShiftForModal = null;
 
         const initialLoginViewWrapper = document.getElementById('initialLoginViewWrapper');
         const loginUserSelect = document.getElementById('loginUserSelect');
@@ -613,8 +613,8 @@
                     const editBtn = document.createElement('button');
                     editBtn.textContent = "Edit Assignment(s)";
                     editBtn.classList.add("edit", "small-action");
-                    editBtn.style.marginBottom = "5px";
-                    editBtn.onclick = () => openAssignEditModal(shift, weekKey, true); // true for edit mode (pre-fill)
+                    editBtn.style.marginBottom = "5px"; 
+                    editBtn.onclick = () => openAssignEditModal(shift, weekKey, true);
                     actionCell.appendChild(editBtn);
 
                     const clearBtn = document.createElement('button');
@@ -633,7 +633,7 @@
                     const assignBtn = document.createElement('button');
                     assignBtn.textContent = "Assign Coworker(s)";
                     assignBtn.classList.add("assign", "small-action");
-                    assignBtn.onclick = () => openAssignEditModal(shift, weekKey, false); // false for new assignment
+                    assignBtn.onclick = () => openAssignEditModal(shift, weekKey, false);
                     actionCell.appendChild(assignBtn);
                 }
 
@@ -716,13 +716,14 @@
 
         function resetAddShiftForm() { editingShiftId = null; if(addUpdateShiftTitle) addUpdateShiftTitle.textContent = "Add New Shift to Selected Week"; if(managerAddShiftBtn) managerAddShiftBtn.textContent = "Add Shift"; if(cancelEditShiftBtn) cancelEditShiftBtn.classList.add('hidden'); if(addShiftDaySelect) addShiftDaySelect.value = "Monday"; if(addShiftTimeTypeSelect) addShiftTimeTypeSelect.value = standardShiftTimes[0]; if(addShiftCustomStartTimeInput) addShiftCustomStartTimeInput.value = ""; if(addShiftCustomEndTimeInput) addShiftCustomEndTimeInput.value = ""; if(addShiftDescriptionInput) addShiftDescriptionInput.value = ""; if(customTimeInputsDiv) customTimeInputsDiv.classList.add('hidden'); if(descriptionInputGroup) descriptionInputGroup.classList.add('hidden'); if(assignCoworkersForCustomShiftDiv) { assignCoworkersForCustomShiftDiv.classList.add('hidden'); assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false); } }
 
-        // This function is now primarily for editing shift *details* (day, time, description) via the top form.
-        // Assignee changes for approved shifts are handled by the new modal.
         function managerEditShiftAssignments(shiftToEdit) {
+            // This function is now for opening the *top form* for editing shift DETAILS (day, time, description)
+            // The new modal handles assignee changes.
             editingShiftId = shiftToEdit.id;
-            addUpdateShiftTitle.textContent = "Update Shift Details"; // Title more focused on details
+            addUpdateShiftTitle.textContent = "Update Shift Details"; // More accurate title
             managerAddShiftBtn.textContent = "Update Shift Details";
             cancelEditShiftBtn.classList.remove('hidden');
+
             addShiftDaySelect.value = shiftToEdit.day;
             const isCustom = isCustomTimeShift(shiftToEdit.time);
             addShiftTimeTypeSelect.value = isCustom ? "custom" : shiftToEdit.time;
@@ -735,34 +736,30 @@
                 addShiftCustomEndTimeInput.value = endTime || "";
                 addShiftDescriptionInput.value = shiftToEdit.description || "";
             } else {
+                // Only pre-fill description if it's not the default "Normal Shift"
                 addShiftDescriptionInput.value = (shiftToEdit.description && shiftToEdit.description !== "Normal Shift") ? shiftToEdit.description : "";
             }
-            // "Assign Coworkers" checkboxes in the top form are NOT pre-filled here anymore,
-            // as assignment is now handled by the dedicated modal.
-            // This form is now just for day/time/description edits primarily.
-            // We can keep assignCoworkersForCustomShiftDiv logic for when creating *new* custom shifts via top form.
-            assignCoworkersForCustomShiftDiv.classList.toggle('hidden', !isCustom && !editingShiftId); // Only show for new custom or if editing custom via top form
-            if (isCustom || editingShiftId) { // if editing an existing shift (even standard) or adding custom, show checkboxes for top form
-                 assignCoworkersForCustomShiftDiv.classList.remove('hidden');
-                 const currentAssignees = shiftToEdit.assignedCoworkers || [];
-                 assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => { 
-                    cb.checked = currentAssignees.includes(cb.value); 
-                });
-            }
 
-
+            // Populate checkboxes in the TOP form based on current assignees
+            // This allows editing assignees if the manager chooses to edit details AND assignees via the top form.
+            assignCoworkersForCustomShiftDiv.classList.remove('hidden');
+            const currentAssignees = shiftToEdit.assignedCoworkers || [];
+            assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = currentAssignees.includes(cb.value);
+            });
+            
             addUpdateShiftTitle.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function isCustomTimeShift(timeStr) { return !standardShiftTimes.includes(timeStr); }
 
-        async function managerAddNewShift() { // This is for the TOP "Add New Shift" form
+        async function managerAddNewShift() {
             if (!currentViewingDateMgr) { await showAlert("No week selected."); return; }
             const selectedDay = addShiftDaySelect.value;
             const timeType = addShiftTimeTypeSelect.value;
             const isCustomSelected = timeType === 'custom';
             let description = addShiftDescriptionInput.value.trim();
-            
+
             let shiftTimeStr;
             let selectedAssigneesInTopForm = [];
 
@@ -776,7 +773,6 @@
                 shiftTimeStr = timeType;
                 if (!description) { description = "Normal Shift"; }
             }
-            // Get assignees if the checkbox group for the top form is visible
             if (!assignCoworkersForCustomShiftDiv.classList.contains('hidden')) {
                 const checkboxes = assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]:checked');
                 checkboxes.forEach(cb => selectedAssigneesInTopForm.push(cb.value));
@@ -794,7 +790,7 @@
                     if (!weekDoc.exists) { weekData = { shifts: [], isPublished: false }; }
                     else { weekData = weekDoc.data(); if (!Array.isArray(weekData.shifts)) weekData.shifts = []; }
 
-                    if (editingShiftId) { // Editing an existing shift's DETAILS via the top form
+                    if (editingShiftId) { 
                         const shiftIndex = weekData.shifts.findIndex(s => s.id === editingShiftId);
                         if (shiftIndex === -1) throw new Error("Shift to edit not found.");
                         const effectiveDescription = (isCustomSelected || description) ? description : "Normal Shift";
@@ -803,19 +799,15 @@
                         weekData.shifts[shiftIndex].date = shiftSpecificDateISO;
                         weekData.shifts[shiftIndex].time = shiftTimeStr;
                         weekData.shifts[shiftIndex].description = effectiveDescription;
-                        // IMPORTANT: Assignees are now primarily handled by the modal.
-                        // If the top form is used to "Update Shift Details", and assignees were shown, respect those.
-                        if (selectedAssigneesInTopForm.length > 0) {
-                             weekData.shifts[shiftIndex].assignedCoworkers = selectedAssigneesInTopForm;
-                             weekData.shifts[shiftIndex].status = "approved";
-                        } else if (weekData.shifts[shiftIndex].status === "approved" && selectedAssigneesInTopForm.length === 0) {
-                            // If it was approved and now no one is selected in top form, make available
-                            // This might be an edge case if user unchecks everyone in top form edit
-                            weekData.shifts[shiftIndex].assignedCoworkers = [];
-                            weekData.shifts[shiftIndex].status = "available";
+                        // Update assignees only if the top form's assignees checkboxes were interacted with for this edit
+                        if (selectedAssigneesInTopForm.length > 0 || assignCoworkersForCustomShiftDiv.classList.contains('hidden') === false) {
+                           weekData.shifts[shiftIndex].assignedCoworkers = selectedAssigneesInTopForm;
+                           weekData.shifts[shiftIndex].status = selectedAssigneesInTopForm.length > 0 ? "approved" : "available";
                         }
-                        // Do not clear applicants here, as this form might not be about applicant management
-                    } else { // Adding a completely new shift via the top form
+                        weekData.shifts[shiftIndex].applicantName = "";
+                        weekData.shifts[shiftIndex].applicants = (weekData.shifts[shiftIndex].status === "available") ? [] : weekData.shifts[shiftIndex].applicants; // Clear applicants if becoming available
+
+                    } else { 
                         const effectiveDescription = (isCustomSelected || description) ? description : "Normal Shift";
                         const existingShift = weekData.shifts.find(s => s.day === selectedDay && s.time === shiftTimeStr && (s.description || "Normal Shift") === effectiveDescription);
                         if (existingShift) { throw new Error(`A shift for ${selectedDay} at ${shiftTimeStr} ${effectiveDescription ? 'with description "'+effectiveDescription+'"' : ''} already exists.`); }
@@ -883,13 +875,11 @@
             const coworkerToDelete = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToDelete) { await showAlert("Coworker not found."); return;}
 
-            // --- REVISED Safeguard Start ---
             if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) {
                 await showAlert("Action Denied: Cannot delete the last manager. The system requires at least one manager account.");
-                return; // Prevent deletion
+                return; 
             }
-            // --- REVISED Safeguard End ---
-
+            
             const doDelete = await showConfirm(`Delete ${coworkerToDelete.name}? This will also remove their assignments and applications.`);
             if (!doDelete) return;
             
@@ -914,7 +904,7 @@
                     if (weekModified) { batch.update(shiftsCollectionRef.doc(weekKey), { shifts: updatedShifts }); changesMadeToShifts = true; if (allShiftsData[weekKey]) { allShiftsData[weekKey].shifts = updatedShifts.map(s => JSON.parse(JSON.stringify(s)));} }
                 });
                 if (changesMadeToShifts) { await batch.commit(); }
-                await initializeCoworkers(); 
+                await initializeCoworkers();
                 populateLoginUserDropdown();
                 populateCoworkerCheckboxesForCustomShift();
                 if (loggedInCoworker && loggedInCoworker.name === coworkerToDelete.name) logout();
@@ -925,7 +915,6 @@
                 await showAlert("Failed to delete: " + error.message);
             }
         }
-
         async function handleChangeCoworkerPassword(coworkerDocIdOrName) {
             const newPassword = await showPrompt(`Enter new password for this coworker:`);
             if (newPassword === null) return;
@@ -944,25 +933,20 @@
                 await showAlert("Failed to change: " + error.message);
             }
         }
-
         async function handleToggleManagerStatus(coworkerDocIdOrName) {
             const coworkerToToggle = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToToggle) return;
             const newManagerStatus = !coworkerToToggle.isManager;
 
-            // --- REVISED Safeguard Start ---
-            // If demoting (newManagerStatus is false) AND this is the last manager
             if (coworkerToToggle.isManager && newManagerStatus === false && coworkers.filter(c => c.isManager).length <= 1) {
                 await showAlert("Action Denied: Cannot demote the last manager. The system requires at least one manager account.");
-                return; // Prevent demotion
+                return;
             }
-            // --- REVISED Safeguard End ---
             
             try {
                 await db.collection('coworkers').doc(coworkerDocIdOrName).update({ isManager: newManagerStatus });
-                coworkerToToggle.isManager = newManagerStatus; // Update local array immediately
-                // No need to call initializeCoworkers() just for this, re-rendering the list is enough
-                renderCoworkerListForManager(); 
+                coworkerToToggle.isManager = newManagerStatus; 
+                renderCoworkerListForManager();
                 if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) {
                     loggedInCoworker.isManager = newManagerStatus;
                     accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
@@ -994,7 +978,7 @@
             
             assignEditCoworkerListDiv.innerHTML = '';
             coworkers.sort((a,b) => a.name.localeCompare(b.name)).forEach(cw => {
-                const checkboxId = `modal-assign-cw-${cw.id || cw.name.replace(/\s+/g, '-')}-${shift.id}`; // Unique ID per shift
+                const checkboxId = `modal-assign-cw-${cw.id || cw.name.replace(/\s+/g, '-')}-${shift.id}`;
                 const label = document.createElement('label');
                 const checkbox = document.createElement('input');
                 checkbox.type = "checkbox";
@@ -1053,7 +1037,7 @@
                         if (selectedCoworkers.length > 0) {
                             weekData.shifts[shiftIndex].status = "approved";
                         } else {
-                            weekData.shifts[shiftIndex].status = "available"; // Becomes available if no one assigned
+                            weekData.shifts[shiftIndex].status = "available";
                         }
                         
                         transaction.update(weekDocRef, { shifts: weekData.shifts });
