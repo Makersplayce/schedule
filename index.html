@@ -308,14 +308,8 @@
                         <div class="manager-hours-column">
                             <h3>Hours Overview</h3>
                             <div class="input-group" style="margin-bottom:5px;"><select id="hoursViewTypeSelect"><option value="weekly">Weekly Hours</option><option value="monthly">Monthly Hours</option></select></div>
-                            <div id="standardHoursOverviewList">
-                                <h4>Standard Shift Hours:</h4>
-                                <!-- Standard hours will be populated here -->
-                            </div>
-                            <hr style="margin: 10px 0;">
-                            <div id="customHoursOverviewList">
-                                <h4>Custom Shift/Event Hours:</h4>
-                                <!-- Custom hours will be populated here -->
+                            <div id="hoursOverviewDisplay">
+                                <!-- Hours will be populated here dynamically -->
                             </div>
                         </div>
                     </div>
@@ -432,7 +426,7 @@
         let editingShiftId = null;
         let currentShiftForModal = null;
         let editingCustomShiftId = null;
-        let currentManagerShiftView = 'standard'; // 'standard' or 'custom'
+        let currentManagerShiftView = 'standard'; 
 
 
         const initialLoginViewWrapper = document.getElementById('initialLoginViewWrapper');
@@ -489,8 +483,7 @@
         const changeMasterPassSuccess = document.getElementById('changeMasterPassSuccess');
         const managerSidebarWeekDisplay = document.getElementById('managerSidebarWeekDisplay');
         const hoursViewTypeSelect = document.getElementById('hoursViewTypeSelect');
-        const standardHoursOverviewListDiv = document.getElementById('standardHoursOverviewList'); // Updated
-        const customHoursOverviewListDiv = document.getElementById('customHoursOverviewList'); // Updated
+        const hoursOverviewDisplayDiv = document.getElementById('hoursOverviewDisplay'); // Single div for dynamic content
 
         const resetAllDataBtn = document.getElementById('resetAllDataBtn');
         const managerSchedulePreviewTitle = document.getElementById('managerSchedulePreviewTitle');
@@ -499,8 +492,8 @@
         const managerCustomShiftsPreviewTableBody = document.getElementById('managerCustomShiftsPreviewTable')?.getElementsByTagName('tbody')[0];
 
         const managerApplicationWeekDisplay = document.getElementById('managerApplicationWeekDisplay');
-        const managerShiftsTableBody = document.getElementById('managerShiftsTable').getElementsByTagName('tbody')[0]; // For Standard Shifts
-        const managerCustomShiftsApplicationTableBody = document.getElementById('managerCustomShiftsApplicationTable')?.getElementsByTagName('tbody')[0]; // New
+        const managerShiftsTableBody = document.getElementById('managerShiftsTable').getElementsByTagName('tbody')[0]; 
+        const managerCustomShiftsApplicationTableBody = document.getElementById('managerCustomShiftsApplicationTable')?.getElementsByTagName('tbody')[0]; 
         const standardShiftsManagementSection = document.getElementById('standardShiftsManagementSection');
         const customShiftsManagementSection = document.getElementById('customShiftsManagementSection');
         const viewStandardShiftsBtnMgr = document.getElementById('viewStandardShiftsBtnMgr');
@@ -517,14 +510,14 @@
         const addUpdateShiftTitle = document.getElementById('addUpdateShiftTitle');
         const addShiftDaySelect = document.getElementById('addShiftDaySelect');
         const addShiftTimeTypeSelect = document.getElementById('addShiftTimeTypeSelect');
-        const customTimeInputsDiv = document.getElementById('customTimeInputs');
+        const customTimeInputsDiv = document.getElementById('customTimeInputs'); 
         const addShiftCustomStartTimeInput = document.getElementById('addShiftCustomStartTime');
         const addShiftCustomEndTimeInput = document.getElementById('addShiftCustomEndTime');
-        const descriptionInputGroup = document.getElementById('descriptionInputGroup');
+        const descriptionInputGroup = document.getElementById('descriptionInputGroup'); 
         const addShiftDescriptionInput = document.getElementById('addShiftDescriptionInput');
         const managerAddShiftBtn = document.getElementById('managerAddShiftBtn');
         const cancelEditShiftBtn = document.getElementById('cancelEditShiftBtn');
-        const assignCoworkersForCustomShiftDiv = document.getElementById('assignCoworkersForCustomShift');
+        const assignCoworkersForCustomShiftDiv = document.getElementById('assignCoworkersForCustomShift'); 
 
         const customAlertModal = document.getElementById('customAlertModal');
         const customAlertTitle = document.getElementById('customAlertTitle');
@@ -695,15 +688,15 @@
                 }
             });
 
-            if (userStandardShiftsTableBody.rows.length === 0) {
+            if (userStandardShiftsTableBody.rows.length === 0) { 
                 userStandardShiftsTableBody.innerHTML = '<tr><td colspan="5">No standard shifts for this application week.</td></tr>';
             }
 
             if (userCustomShiftsTableBody) {
                 userCustomShiftsSection.classList.toggle('hidden', !hasCustomShiftsForApplicationWeek);
-                if (userCustomShiftsTableBody.rows.length === 0 && hasCustomShiftsForApplicationWeek){
+                if (userCustomShiftsTableBody.rows.length === 0 && hasCustomShiftsForApplicationWeek){ 
                      userCustomShiftsTableBody.innerHTML = '<tr><td colspan="5">No custom shifts/events for this application week.</td></tr>';
-                } else if (!hasCustomShiftsForApplicationWeek) {
+                } else if (!hasCustomShiftsForApplicationWeek) { 
                     userCustomShiftsTableBody.innerHTML = '<tr><td colspan="5">No custom shifts/events for this application week.</td></tr>';
                 }
             }
@@ -712,8 +705,8 @@
         function renderLatestCustomShiftsForUser(shiftsForWeek) {
             if (!userLatestCustomShiftsTableBody || !userLatestCustomShiftsSection) return;
             userLatestCustomShiftsTableBody.innerHTML = '';
-            const customApprovedShifts = shiftsForWeek.filter(s => s.status === "approved" && isCustomTimeShift(s.time));
-
+            const customApprovedShifts = shiftsForWeek.filter(s => s.status === "approved" && isCustomTimeShift(s.time)); 
+            
             if (customApprovedShifts.length > 0) {
                 userLatestCustomShiftsSection.classList.remove('hidden');
                 sortShiftsArray(customApprovedShifts);
@@ -795,31 +788,63 @@
                 }
             }
         }
-        async function refreshManagerDashboard() { if (!isManagerModeActive) return; try { const weekData = await getWeekData(currentViewingDateMgr); if (weekData.error || !weekData.shifts) { managerSidebarWeekDisplay.textContent = "Error loading week."; managerApplicationWeekDisplay.textContent = "Error loading apps."; managerSchedulePreviewTitle.textContent = "Error loading schedule."; if(managerShiftsTableBody) managerShiftsTableBody.innerHTML = '<tr><td colspan="6">Error loading shifts.</td></tr>'; if(managerCustomShiftsApplicationTableBody) managerCustomShiftsApplicationTableBody.innerHTML = '<tr><td colspan="6">Error loading custom shifts.</td></tr>'; if(managerSchedulePreviewTableBody) managerSchedulePreviewTableBody.innerHTML = '<tr><td colspan="3">Error loading preview.</td></tr>'; if(standardHoursOverviewListDiv) standardHoursOverviewListDiv.innerHTML = "<h4>Standard Shift Hours:</h4><p>Error.</p>"; if(customHoursOverviewListDiv) customHoursOverviewListDiv.innerHTML = "<h4>Custom Shift/Event Hours:</h4><p>Error.</p>"; if(managerCustomShiftsPreviewSection) managerCustomShiftsPreviewSection.classList.add('hidden'); return; } const shiftsForViewingWeek = weekData.shifts; sortShiftsArray(shiftsForViewingWeek); managerSidebarWeekDisplay.textContent = `Week: ${formatDate(currentViewingDateMgr, false)}`; managerApplicationWeekDisplay.textContent = `Apps for week: ${formatDate(currentViewingDateMgr, false)}`; managerSchedulePreviewTitle.textContent = `Schedule: Week of ${formatDate(currentViewingDateMgr, false)}`; renderManagerApplications(shiftsForViewingWeek); renderScheduleOverview(shiftsForViewingWeek, managerSchedulePreviewTableBody); renderCoworkerListForManager(); renderHoursOverview(shiftsForViewingWeek); await renderTotalHoursSummary(); if (weekData.isPublished) { publishWeekBtn.textContent = "Unpublish Week"; publishWeekBtn.classList.remove("publish"); publishWeekBtn.classList.add("deny"); publishStatusIndicator.textContent = "Status: Published"; publishStatusIndicator.style.color = "green"; } else { publishWeekBtn.textContent = "Publish Week"; publishWeekBtn.classList.add("publish"); publishWeekBtn.classList.remove("deny"); publishStatusIndicator.textContent = "Status: Not Published"; publishStatusIndicator.style.color = "orange"; } } catch (error) { console.error("Error refreshing manager dashboard:", error); } }
+        async function refreshManagerDashboard() { 
+            if (!isManagerModeActive) return; 
+            try { 
+                const weekData = await getWeekData(currentViewingDateMgr); 
+                if (weekData.error || !weekData.shifts) { 
+                    managerSidebarWeekDisplay.textContent = "Error loading week."; 
+                    managerApplicationWeekDisplay.textContent = "Error loading apps."; 
+                    managerSchedulePreviewTitle.textContent = "Error loading schedule."; 
+                    if(managerShiftsTableBody) managerShiftsTableBody.innerHTML = '<tr><td colspan="6">Error loading shifts.</td></tr>'; 
+                    if(managerCustomShiftsApplicationTableBody) managerCustomShiftsApplicationTableBody.innerHTML = '<tr><td colspan="6">Error loading custom shifts.</td></tr>';
+                    if(managerSchedulePreviewTableBody) managerSchedulePreviewTableBody.innerHTML = '<tr><td colspan="3">Error loading preview.</td></tr>'; 
+                    if(hoursOverviewDisplayDiv) hoursOverviewDisplayDiv.innerHTML = "<p>Error loading hours.</p>"; 
+                    if(managerCustomShiftsPreviewSection) managerCustomShiftsPreviewSection.classList.add('hidden'); 
+                    return; 
+                } 
+                const shiftsForViewingWeek = weekData.shifts; 
+                sortShiftsArray(shiftsForViewingWeek); 
+                managerSidebarWeekDisplay.textContent = `Week: ${formatDate(currentViewingDateMgr, false)}`; 
+                managerApplicationWeekDisplay.textContent = `Apps for week: ${formatDate(currentViewingDateMgr, false)}`; 
+                managerSchedulePreviewTitle.textContent = `Schedule: Week of ${formatDate(currentViewingDateMgr, false)}`; 
+                renderManagerApplications(shiftsForViewingWeek); // This will now render to the correct table based on currentManagerShiftView
+                renderScheduleOverview(shiftsForViewingWeek, managerSchedulePreviewTableBody); 
+                renderCoworkerListForManager(); 
+                renderHoursOverview(shiftsForViewingWeek); // This will now update based on currentManagerShiftView
+                await renderTotalHoursSummary(); 
+                if (weekData.isPublished) { 
+                    publishWeekBtn.textContent = "Unpublish Week"; 
+                    publishWeekBtn.classList.remove("publish"); 
+                    publishWeekBtn.classList.add("deny"); 
+                    publishStatusIndicator.textContent = "Status: Published"; 
+                    publishStatusIndicator.style.color = "green"; 
+                } else { 
+                    publishWeekBtn.textContent = "Publish Week"; 
+                    publishWeekBtn.classList.add("publish"); 
+                    publishWeekBtn.classList.remove("deny"); 
+                    publishStatusIndicator.textContent = "Status: Not Published"; 
+                    publishStatusIndicator.style.color = "orange"; 
+                } 
+            } catch (error) { 
+                console.error("Error refreshing manager dashboard:", error); 
+            } 
+        }
 
-        function renderManagerApplications(shiftsForWeek) {
-            const targetTableBody = currentManagerShiftView === 'standard' ? managerShiftsTableBody : managerCustomShiftsApplicationTableBody;
-            const otherTableBody = currentManagerShiftView === 'standard' ? managerCustomShiftsApplicationTableBody : managerShiftsTableBody;
-            
-            if (!targetTableBody) return;
-            targetTableBody.innerHTML = ""; 
-            if(otherTableBody && document.getElementById(otherTableBody.parentElement.id).classList.contains('hidden') === false) {
-                 // If the other table was visible, ensure its content is cleared or set to a default message if no shifts
-                otherTableBody.innerHTML = `<tr><td colspan="6">View switched. Select '${currentManagerShiftView === 'standard' ? 'Custom' : 'Standard'}' shifts to see applications.</td></tr>`;
-            }
+        function renderManagerApplications(allShiftsForWeek) { // Renamed param for clarity
+            const standardShiftsToShow = allShiftsForWeek.filter(shift => !isCustomTimeShift(shift.time));
+            const customShiftsToShow = allShiftsForWeek.filter(shift => isCustomTimeShift(shift.time));
 
-
-            const shiftsToDisplay = shiftsForWeek.filter(shift => {
-                const isStandard = standardShiftTimes.includes(shift.time) && !isCustomTimeShift(shift.time);
-                return currentManagerShiftView === 'standard' ? isStandard : !isStandard;
-            });
-
-            if (shiftsToDisplay.length === 0) {
-                targetTableBody.innerHTML = `<tr><td colspan="6">No ${currentManagerShiftView} shifts with applications for this week.</td></tr>`;
-            } else {
-                sortShiftsArray(shiftsToDisplay); // Sort only the filtered shifts
-                shiftsToDisplay.forEach(shift => {
-                    const row = targetTableBody.insertRow();
+            const renderTable = (shifts, tableBody) => {
+                if (!tableBody) return;
+                tableBody.innerHTML = "";
+                if (shifts.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6">No ${currentManagerShiftView} shifts with applications for this week.</td></tr>`;
+                    return;
+                }
+                sortShiftsArray(shifts);
+                shifts.forEach(shift => {
+                    const row = tableBody.insertRow();
                     row.insertCell().textContent = shift.day;
                     row.insertCell().textContent = formatDate(new Date(shift.date), false);
                     const timeCell = row.insertCell(); timeCell.textContent = shift.time;
@@ -915,99 +940,103 @@
                     const deleteShiftBtn = document.createElement('button'); deleteShiftBtn.textContent = "Delete Shift"; deleteShiftBtn.classList.add("delete", "small-action"); deleteShiftBtn.style.marginTop = "5px"; deleteShiftBtn.onclick = () => managerDeleteShift(shift.id, weekKey); actionCell.appendChild(deleteShiftBtn);
                 });
             }
+        };
+
+        if (currentManagerShiftView === 'standard') {
+            renderTable(standardShiftsToShow, managerShiftsTableBody);
+            if (managerCustomShiftsApplicationTableBody) managerCustomShiftsApplicationTableBody.innerHTML = '<tr><td colspan="6">View Standard Shifts above.</td></tr>'; // Clear other table
+        } else { // custom view
+            renderTable(customShiftsToShow, managerCustomShiftsApplicationTableBody);
+            if (managerShiftsTableBody) managerShiftsTableBody.innerHTML = '<tr><td colspan="6">View Custom Shifts above.</td></tr>'; // Clear other table
+        }
+    }
+
+
+    function renderHoursOverview(shiftsForViewingWeek) {
+        if (!hoursOverviewDisplayDiv) return;
+        hoursOverviewDisplayDiv.innerHTML = ""; // Clear previous content
+
+        if (!shiftsForViewingWeek || !Array.isArray(shiftsForViewingWeek)) {
+            hoursOverviewDisplayDiv.innerHTML = "<p>Could not load hours.</p>";
+            return;
         }
 
+        const type = hoursViewTypeSelect.value; // weekly or monthly
+        const hoursData = {};
+        coworkers.forEach(c => {
+            hoursData[c.name] = 0;
+        });
 
-        function renderHoursOverview(shiftsForViewingWeek) {
-            if (!standardHoursOverviewListDiv || !customHoursOverviewListDiv) return;
-
-            standardHoursOverviewListDiv.innerHTML = "<h4>Standard Shift Hours:</h4>";
-            customHoursOverviewListDiv.innerHTML = "<h4>Custom Shift/Event Hours:</h4>";
-
-            if (!shiftsForViewingWeek || !Array.isArray(shiftsForViewingWeek)) {
-                standardHoursOverviewListDiv.innerHTML += "<p>Could not load hours.</p>";
-                customHoursOverviewListDiv.innerHTML += "<p>Could not load hours.</p>";
-                return;
-            }
-
-            const type = hoursViewTypeSelect.value;
-            const standardHoursData = {};
-            const customHoursData = {};
-            coworkers.forEach(c => {
-                standardHoursData[c.name] = 0;
-                customHoursData[c.name] = 0;
-            });
-
-            const processShiftHours = (shift) => {
-                if (standardShiftTimes.includes(shift.time) && !isCustomTimeShift(shift.time)) return SHIFT_DURATION_HOURS;
-                if (shift.time && shift.time.includes(' - ')) {
-                    try {
-                        const [startStr, endStr] = shift.time.split(' - ');
-                        const [startH, startM] = startStr.split(':').map(Number);
-                        const [endH, endM] = endStr.split(':').map(Number);
-                        if (!isNaN(startH) && !isNaN(startM) && !isNaN(endH) && !isNaN(endM)) {
-                            const startDate = new Date(0, 0, 0, startH, startM);
-                            const endDate = new Date(0, 0, 0, endH, endM);
-                            let diffMillis = endDate - startDate;
-                            if (diffMillis < 0) diffMillis += 24 * 60 * 60 * 1000; // Handles overnight shifts, though less likely here
-                            return diffMillis / (1000 * 60 * 60);
-                        }
-                    } catch (e) { return 0; }
-                }
-                return 0;
-            };
-
-            let shiftsToProcessForHours = [];
-            if (type === "weekly") {
-                shiftsToProcessForHours = shiftsForViewingWeek;
-            } else if (type === "monthly") {
-                const targetMonth = currentViewingDateMgr.getMonth();
-                const targetYear = currentViewingDateMgr.getFullYear();
-                for (const weekKey in allShiftsData) {
-                    const weekStartDate = new Date(weekKey);
-                    if (weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear && allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) {
-                        shiftsToProcessForHours = shiftsToProcessForHours.concat(allShiftsData[weekKey].shifts);
+        const processShiftHours = (shift) => {
+            if (standardShiftTimes.includes(shift.time) && !isCustomTimeShift(shift.time)) return SHIFT_DURATION_HOURS;
+            if (shift.time && shift.time.includes(' - ')) {
+                try {
+                    const [startStr, endStr] = shift.time.split(' - ');
+                    const [startH, startM] = startStr.split(':').map(Number);
+                    const [endH, endM] = endStr.split(':').map(Number);
+                    if (!isNaN(startH) && !isNaN(startM) && !isNaN(endH) && !isNaN(endM)) {
+                        const startDate = new Date(0, 0, 0, startH, startM);
+                        const endDate = new Date(0, 0, 0, endH, endM);
+                        let diffMillis = endDate - startDate;
+                        if (diffMillis < 0) diffMillis += 24 * 60 * 60 * 1000;
+                        return diffMillis / (1000 * 60 * 60);
                     }
+                } catch (e) { return 0; }
+            }
+            return 0;
+        };
+
+        let shiftsToProcessForHours = [];
+        if (type === "weekly") {
+            shiftsToProcessForHours = shiftsForViewingWeek;
+        } else if (type === "monthly") {
+            const targetMonth = currentViewingDateMgr.getMonth();
+            const targetYear = currentViewingDateMgr.getFullYear();
+            for (const weekKey in allShiftsData) {
+                const weekStartDate = new Date(weekKey);
+                if (weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear && allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) {
+                    shiftsToProcessForHours = shiftsToProcessForHours.concat(allShiftsData[weekKey].shifts);
                 }
             }
+        }
 
-            shiftsToProcessForHours.filter(s => s.status === "approved").forEach(s => {
-                const duration = processShiftHours(s);
-                const isStandard = standardShiftTimes.includes(s.time) && !isCustomTimeShift(s.time);
-                const hoursDataTarget = isStandard ? standardHoursData : customHoursData;
+        // Filter shifts based on currentManagerShiftView
+        const filteredShiftsForHours = shiftsToProcessForHours.filter(s => {
+            const isStandard = standardShiftTimes.includes(s.time) && !isCustomTimeShift(s.time);
+            return currentManagerShiftView === 'standard' ? isStandard : !isStandard;
+        });
 
-                if (Array.isArray(s.assignedCoworkers)) {
-                    s.assignedCoworkers.forEach(name => {
-                        if (hoursDataTarget.hasOwnProperty(name)) {
-                            hoursDataTarget[name] += duration;
-                        }
-                    });
-                } else if (s.applicantName && hoursDataTarget.hasOwnProperty(s.applicantName)) { // Fallback, though assignedCoworkers is preferred
-                     hoursDataTarget[s.applicantName] += duration;
-                }
-            });
+        filteredShiftsForHours.filter(s => s.status === "approved").forEach(s => {
+            const duration = processShiftHours(s);
+            if (Array.isArray(s.assignedCoworkers)) {
+                s.assignedCoworkers.forEach(name => {
+                    if (hoursData.hasOwnProperty(name)) {
+                        hoursData[name] += duration;
+                    }
+                });
+            } else if (s.applicantName && hoursData.hasOwnProperty(s.applicantName)) {
+                 hoursData[s.applicantName] += duration;
+            }
+        });
 
-            const sortedCoworkers = Object.keys(standardHoursData).sort(); // Use one as source for sorted names
+        const overviewTitle = document.createElement('h4');
+        overviewTitle.textContent = currentManagerShiftView === 'standard' ? "Standard Shift Hours:" : "Custom Shift/Event Hours:";
+        hoursOverviewDisplayDiv.appendChild(overviewTitle);
 
-            let standardContent = "<h4>Standard Shift Hours:</h4>";
-            if (sortedCoworkers.length === 0) standardContent += "<p>No coworkers found.</p>";
+        const sortedCoworkers = Object.keys(hoursData).sort();
+        if (sortedCoworkers.length === 0) {
+            const p = document.createElement('p');
+            p.textContent = "No coworkers found.";
+            hoursOverviewDisplayDiv.appendChild(p);
+        } else {
             sortedCoworkers.forEach(name => {
                 const item = document.createElement('div');
                 item.classList.add('hours-overview-item');
-                item.textContent = `${name}: ${standardHoursData[name].toFixed(1)} hrs`;
-                standardHoursOverviewListDiv.appendChild(item);
-            });
-
-
-            let customContent = "<h4>Custom Shift/Event Hours:</h4>";
-            if (sortedCoworkers.length === 0) customContent += "<p>No coworkers found.</p>";
-             sortedCoworkers.forEach(name => {
-                const item = document.createElement('div');
-                item.classList.add('hours-overview-item');
-                item.textContent = `${name}: ${customHoursData[name].toFixed(1)} hrs`;
-                customHoursOverviewListDiv.appendChild(item);
+                item.textContent = `${name}: ${hoursData[name].toFixed(1)} hrs`;
+                hoursOverviewDisplayDiv.appendChild(item);
             });
         }
+    }
 
         async function renderMyPastShifts() { if (!loggedInCoworker) { if (myPastShiftsSection) myPastShiftsSection.classList.add('hidden'); return; } if (!myPastShiftsSection) { return; } myPastShiftsSection.classList.remove('hidden'); const viewType = pastShiftsViewTypeSelect.value; myPastShiftsTableBody.innerHTML = ""; let periodStart, periodEnd, displayPeriodString = ""; if (viewType === "weekly") { periodStart = getMondayOfDate(new Date(currentPastShiftViewDate)); periodEnd = new Date(periodStart); periodEnd.setDate(periodStart.getDate() + 6); periodEnd.setHours(23, 59, 59, 999); displayPeriodString = `Week of ${formatDate(periodStart, false)}`; } else { periodStart = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth(), 1); periodEnd = new Date(currentPastShiftViewDate.getFullYear(), currentPastShiftViewDate.getMonth() + 1, 0); periodEnd.setHours(23, 59, 59, 999); displayPeriodString = `${periodStart.toLocaleString('default', { month: 'long' })} ${periodStart.getFullYear()}`; } myPastShiftsPeriodDisplay.textContent = displayPeriodString; const userPastShifts = []; try { for (const weekKey in allShiftsData) { const weekData = allShiftsData[weekKey]; if (weekData && Array.isArray(weekData.shifts)) { weekData.shifts.forEach(shift => { const shiftDate = new Date(shift.date); const isAssignedToUser = (shift.applicantName === loggedInCoworker.name) || (Array.isArray(shift.assignedCoworkers) && shift.assignedCoworkers.includes(loggedInCoworker.name)); if ( shift.status === 'approved' && isAssignedToUser && shiftDate >= periodStart && shiftDate <= periodEnd ) { userPastShifts.push(shift); } }); } } } catch (error) { myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">Error loading past shifts.</td></tr>`; return; } if (userPastShifts.length === 0) { myPastShiftsTableBody.innerHTML = `<tr><td colspan="3">No approved shifts found.</td></tr>`; return; } sortShiftsArray(userPastShifts); userPastShifts.forEach(shift => { const row = myPastShiftsTableBody.insertRow(); row.insertCell().textContent = formatDate(new Date(shift.date), false); row.insertCell().textContent = shift.day; const timeCell = row.insertCell(); timeCell.textContent = shift.time; const effectiveDescription = (!shift.description && standardShiftTimes.includes(shift.time) && !isCustomTimeShift(shift.time)) ? "Normal Shift" : shift.description; if(effectiveDescription){ const descSpan = document.createElement('span'); descSpan.className='shift-description-display'; descSpan.textContent = effectiveDescription; timeCell.appendChild(descSpan);} }); }
         async function renderTotalHoursSummary() { totalHoursSummaryTableBody.innerHTML = ""; const period = totalHoursPeriodSelect.value; const summaryData = {}; coworkers.forEach(c => summaryData[c.name] = 0); let shiftsToConsider = []; const processShiftHours = (shift) => { if (standardShiftTimes.includes(shift.time) && !isCustomTimeShift(shift.time)) return SHIFT_DURATION_HOURS; if (shift.time && shift.time.includes(' - ')) { try { const [startStr, endStr] = shift.time.split(' - '); const [startH, startM] = startStr.split(':').map(Number); const [endH, endM] = endStr.split(':').map(Number); if (!isNaN(startH) && !isNaN(startM) && !isNaN(endH) && !isNaN(endM)) { const startDate = new Date(0,0,0,startH,startM); const endDate = new Date(0,0,0,endH,endM); let diffMillis = endDate - startDate; if (diffMillis < 0) diffMillis += 24 * 60 * 60 * 1000; return diffMillis / (1000 * 60 * 60); } } catch(e) { return 0; } } return 0; }; if (period === "viewing_week") { const weekData = await getShiftsForWeek(currentViewingDateMgr); if (weekData && Array.isArray(weekData.shifts)) shiftsToConsider = weekData.shifts; } else if (period === "viewing_month") { const targetMonth = currentViewingDateMgr.getMonth(); const targetYear = currentViewingDateMgr.getFullYear(); for (const weekKey in allShiftsData) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { const weekStartDate = new Date(weekKey); if(weekStartDate.getMonth() === targetMonth && weekStartDate.getFullYear() === targetYear) { shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts); } } } } else if (period === "all_loaded") { for (const weekKey in allShiftsData) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts)) { shiftsToConsider = shiftsToConsider.concat(allShiftsData[weekKey].shifts); } } } shiftsToConsider.filter(s => s.status === "approved").forEach(s => { const duration = processShiftHours(s); if (s.applicantName && summaryData.hasOwnProperty(s.applicantName)) { summaryData[s.applicantName] += duration; } else if (Array.isArray(s.assignedCoworkers)) { s.assignedCoworkers.forEach(name => { if(summaryData.hasOwnProperty(name)) summaryData[name] += duration; }); } }); const sortedCoworkerNames = Object.keys(summaryData).sort(); sortedCoworkerNames.forEach(name => { const row = totalHoursSummaryTableBody.insertRow(); row.insertCell().textContent = name; row.insertCell().textContent = summaryData[name].toFixed(1) + " hrs"; }); }
@@ -1084,18 +1113,20 @@
             if(managerAddShiftBtn) managerAddShiftBtn.textContent = "Add Shift"; 
             if(cancelEditShiftBtn) cancelEditShiftBtn.classList.add('hidden'); 
             if(addShiftDaySelect) addShiftDaySelect.value = "Monday"; 
-            if(addShiftTimeTypeSelect) addShiftTimeTypeSelect.value = standardShiftTimes[0];  
+            if(addShiftTimeTypeSelect) {
+                addShiftTimeTypeSelect.value = standardShiftTimes[0];  
+                addShiftTimeTypeSelect.disabled = false; // Ensure it's enabled for new standard shifts
+            }
             if(descriptionInputGroup) descriptionInputGroup.classList.add('hidden'); 
             if(addShiftDescriptionInput) addShiftDescriptionInput.value = ""; 
             if(assignCoworkersForCustomShiftDiv) { 
                 assignCoworkersForCustomShiftDiv.classList.add('hidden'); 
                 assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false); 
             } 
-            addShiftTimeTypeSelect.disabled = false; // Re-enable for new standard shifts
-            customTimeInputsDiv.classList.add('hidden'); // Ensure custom time specific inputs are hidden
+            if(customTimeInputsDiv) customTimeInputsDiv.classList.add('hidden'); // Ensure custom time inputs are hidden too
         }
         
-        function managerEditShiftAssignments(shiftToEdit) { // For TOP form - when editing DETAILS of a shift
+        function managerEditShiftAssignments(shiftToEdit) { 
             editingShiftId = shiftToEdit.id; 
             addUpdateShiftTitle.textContent = "Update Shift Details";
             managerAddShiftBtn.textContent = "Update Shift Details";
@@ -1109,16 +1140,15 @@
                 customTimeInputsDiv.classList.add('hidden'); 
                 descriptionInputGroup.classList.toggle('hidden', !(shiftToEdit.description && shiftToEdit.description !== "Normal Shift"));
                 addShiftDescriptionInput.value = (shiftToEdit.description && shiftToEdit.description !== "Normal Shift") ? shiftToEdit.description : "";
-                assignCoworkersForCustomShiftDiv.classList.remove('hidden'); 
             } else { 
                 addShiftTimeTypeSelect.value = standardShiftTimes[0]; 
-                addShiftTimeTypeSelect.disabled = true; // Can't change a custom shift to standard via this form's dropdown
-                customTimeInputsDiv.classList.add('hidden'); // Custom time itself not edited here
+                addShiftTimeTypeSelect.disabled = true;
+                customTimeInputsDiv.classList.add('hidden'); 
                 descriptionInputGroup.classList.remove('hidden'); 
                 addShiftDescriptionInput.value = shiftToEdit.description || "";
-                assignCoworkersForCustomShiftDiv.classList.remove('hidden'); 
             }
             
+            assignCoworkersForCustomShiftDiv.classList.remove('hidden'); // Keep this for editing existing shifts assignees via top form
             const currentAssignees = shiftToEdit.assignedCoworkers || [];
             assignCoworkersForCustomShiftDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 cb.checked = currentAssignees.includes(cb.value);
@@ -1132,7 +1162,7 @@
             return !standardShiftTimes.includes(timeStr); 
         }
 
-        async function managerAddNewShift() { 
+        async function managerAddNewShift() { // For the TOP "Add New Standard Shift" form
             if (!currentViewingDateMgr) { await showAlert("No week selected."); return; }
             const selectedDay = addShiftDaySelect.value;
             const timeType = addShiftTimeTypeSelect.value;
@@ -1186,7 +1216,7 @@
                     } else { 
                         const existingShift = weekData.shifts.find(s => s.day === selectedDay && s.time === shiftTimeStr && (s.description || "Normal Shift") === (description || "Normal Shift"));
                         if (existingShift) { throw new Error(`A shift for ${selectedDay} at ${shiftTimeStr} ${description ? 'with description "'+description+'"' : ''} already exists.`); }
-                        const newShift = { id: `${weekKey}-${Date.now()}`, day: selectedDay, date: shiftSpecificDateISO, time: shiftTimeStr, status: "available", applicants: [], applicantName: "", description: description, assignedCoworkers: [] }; // New standard shifts are unassigned
+                        const newShift = { id: `${weekKey}-${Date.now()}`, day: selectedDay, date: shiftSpecificDateISO, time: shiftTimeStr, status: "available", applicants: [], applicantName: "", description: description, assignedCoworkers: [] };
                         weekData.shifts.push(newShift);
                     }
                     sortShiftsArray(weekData.shifts);
@@ -1535,8 +1565,8 @@
         showChangeMasterPassBtn.addEventListener('click', () => { changeMasterPasswordSection.classList.toggle('hidden'); changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; currentMasterPasswordInput.value = ""; newMasterPasswordInput.value = ""; confirmNewMasterPasswordInput.value = ""; });
         submitChangeMasterPassBtn.addEventListener('click', handleSubmitChangeMasterPassword);
         cancelChangeMasterPassBtn.addEventListener('click', () => { changeMasterPasswordSection.classList.add('hidden'); changeMasterPassError.textContent = ""; changeMasterPassSuccess.textContent = ""; });
-        hoursViewTypeSelect.addEventListener('change', () => refreshManagerDashboard()); // This will call renderHoursOverview
-        totalHoursPeriodSelect.addEventListener('change', () => refreshManagerDashboard()); // This will call renderTotalHoursSummary
+        hoursViewTypeSelect.addEventListener('change', () => refreshManagerDashboard()); 
+        totalHoursPeriodSelect.addEventListener('change', () => refreshManagerDashboard()); 
         resetAllDataBtn.addEventListener('click', handleResetAllData);
         addCoworkerBtn.addEventListener('click', handleAddCoworker);
         newCoworkerPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddCoworker(); });
@@ -1544,7 +1574,7 @@
         if (managerAddShiftBtn) { managerAddShiftBtn.addEventListener('click', managerAddNewShift); }
         if (cancelEditShiftBtn) { cancelEditShiftBtn.addEventListener('click', resetAddShiftForm); }
         
-        // Event listeners for manager shift view toggle buttons
+        // Manager Shift View Toggle Logic
         if(viewStandardShiftsBtnMgr) {
             viewStandardShiftsBtnMgr.addEventListener('click', () => {
                 currentManagerShiftView = 'standard';
@@ -1552,7 +1582,7 @@
                 if(customShiftsManagementSection) customShiftsManagementSection.classList.add('hidden');
                 viewStandardShiftsBtnMgr.classList.add('active-view');
                 if(viewCustomShiftsBtnMgr) viewCustomShiftsBtnMgr.classList.remove('active-view');
-                refreshManagerDashboard(); // Re-render the applications table
+                refreshManagerDashboard(); 
             });
         }
         if(viewCustomShiftsBtnMgr) {
@@ -1562,7 +1592,7 @@
                 standardShiftsManagementSection.classList.add('hidden');
                 if(viewCustomShiftsBtnMgr) viewCustomShiftsBtnMgr.classList.add('active-view');
                 viewStandardShiftsBtnMgr.classList.remove('active-view');
-                refreshManagerDashboard(); // Re-render the applications table
+                refreshManagerDashboard();
             });
         }
 
