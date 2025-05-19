@@ -875,9 +875,24 @@
             const coworkerToDelete = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToDelete) { await showAlert("Coworker not found."); return;}
 
+            // Safeguard 1: Prevent deleting the last manager
             if (coworkerToDelete.isManager && coworkers.filter(c => c.isManager).length <= 1) {
                 await showAlert("Action Denied: Cannot delete the last manager. The system requires at least one manager account.");
-                return; 
+                return;
+            }
+
+            // Safeguard 2: Password prompt if deleting ANY manager
+            if (coworkerToDelete.isManager) {
+                const enteredPassword = await showPrompt(`To delete manager '${coworkerToDelete.name}', please enter the Master Admin Password:`);
+                if (enteredPassword === null) { // User cancelled prompt
+                    await showAlert("Deletion cancelled by user.");
+                    return;
+                }
+                if (enteredPassword !== currentMasterPassword) {
+                    await showAlert("Master Admin Password incorrect. Deletion cancelled.");
+                    return;
+                }
+                await showAlert("Master Admin Password confirmed. Proceeding with deletion confirmation...");
             }
             
             const doDelete = await showConfirm(`Delete ${coworkerToDelete.name}? This will also remove their assignments and applications.`);
@@ -904,7 +919,7 @@
                     if (weekModified) { batch.update(shiftsCollectionRef.doc(weekKey), { shifts: updatedShifts }); changesMadeToShifts = true; if (allShiftsData[weekKey]) { allShiftsData[weekKey].shifts = updatedShifts.map(s => JSON.parse(JSON.stringify(s)));} }
                 });
                 if (changesMadeToShifts) { await batch.commit(); }
-                await initializeCoworkers();
+                await initializeCoworkers(); 
                 populateLoginUserDropdown();
                 populateCoworkerCheckboxesForCustomShift();
                 if (loggedInCoworker && loggedInCoworker.name === coworkerToDelete.name) logout();
@@ -915,6 +930,7 @@
                 await showAlert("Failed to delete: " + error.message);
             }
         }
+
         async function handleChangeCoworkerPassword(coworkerDocIdOrName) {
             const newPassword = await showPrompt(`Enter new password for this coworker:`);
             if (newPassword === null) return;
@@ -933,20 +949,36 @@
                 await showAlert("Failed to change: " + error.message);
             }
         }
+
         async function handleToggleManagerStatus(coworkerDocIdOrName) {
             const coworkerToToggle = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToToggle) return;
-            const newManagerStatus = !coworkerToToggle.isManager;
+            const newManagerStatus = !coworkerToToggle.isManager; // true if promoting, false if demoting
 
+            // Safeguard 1: Prevent demoting the last manager
             if (coworkerToToggle.isManager && newManagerStatus === false && coworkers.filter(c => c.isManager).length <= 1) {
                 await showAlert("Action Denied: Cannot demote the last manager. The system requires at least one manager account.");
                 return;
+            }
+
+            // Safeguard 2: Password prompt if demoting ANY manager
+            if (coworkerToToggle.isManager && newManagerStatus === false) { // Only prompt if currently a manager and action is to demote
+                const enteredPassword = await showPrompt(`To demote manager '${coworkerToToggle.name}', please enter the Master Admin Password:`);
+                 if (enteredPassword === null) { // User cancelled prompt
+                    await showAlert("Demotion cancelled by user.");
+                    return;
+                }
+                if (enteredPassword !== currentMasterPassword) {
+                    await showAlert("Master Admin Password incorrect. Demotion cancelled.");
+                    return;
+                }
+                await showAlert("Master Admin Password confirmed. Proceeding with demotion...");
             }
             
             try {
                 await db.collection('coworkers').doc(coworkerDocIdOrName).update({ isManager: newManagerStatus });
                 coworkerToToggle.isManager = newManagerStatus; 
-                renderCoworkerListForManager();
+                renderCoworkerListForManager(); 
                 if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) {
                     loggedInCoworker.isManager = newManagerStatus;
                     accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
