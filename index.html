@@ -43,6 +43,7 @@
         .input-group { margin-bottom: 15px; }
         .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) label { display: block; margin-bottom: 5px; }
         .input-group:not(.add-shift-section .input-group) input[type="text"],
+        .input-group:not(.add-shift-section .input-group) input[type="email"], /* MODIFICATION: Added type="email" */
         .input-group:not(.add-shift-section .input-group) input[type="password"],
         .input-group:not(.add-shift-section .input-group) select {
             width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 4px;
@@ -83,6 +84,12 @@
         .modal-checkbox-list label { display: block; margin-bottom: 5px; }
         .view-toggle-buttons button { margin-bottom: 10px;}
         .view-toggle-buttons button.active-view { background-color: #0056b3; }
+        /* MODIFICATION START: Styles for My Account Section */
+        #myAccountSettingsSection { border-top: 2px solid #007bff; padding-top: 15px; margin-top: 30px; }
+        #myAccountSettingsSection h3 { margin-top: 0;}
+        #myAccountSettingsSection .input-group { max-width: 400px; margin-left: auto; margin-right: auto; }
+        #myAccountSettingsSection .email-display-text { font-style: italic; color: #555; margin-bottom: 10px; text-align: center;}
+        /* MODIFICATION END: Styles for My Account Section */
 
 
         /* --- START OF MOBILE RESPONSIVE STYLES --- */
@@ -142,7 +149,7 @@
             .coworker-management-item { flex-direction: column; align-items: flex-start; gap: 8px; }
             .coworker-management-item span { margin-bottom: 5px; }
             .coworker-management-item div { display: flex; flex-wrap: wrap; gap: 5px; }
-            .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="text"], .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="password"], .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) select { width: 100%; box-sizing: border-box; }
+            .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="text"], .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="password"], .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) input[type="email"], .input-group:not(.add-shift-section .input-group):not(.coworker-checkbox-group) select { width: 100%; box-sizing: border-box; } /* MODIFICATION: Added type="email" */
             #changeMasterPasswordSection button { width: 100%; margin-bottom: 10px; }
             #changeMasterPasswordSection button.secondary { margin-top: 0; }
             #managerUnlockModal > div { width: 90%; max-width: 350px; padding: 20px; }
@@ -153,6 +160,12 @@
             #customShiftCreationModal > div { width: 90%; max-width: 500px; padding: 20px; }
             .view-toggle-buttons { flex-direction: column; gap: 5px; }
             .view-toggle-buttons button { width: 100%; }
+
+             /* MODIFICATION START: Styles for My Account Section Mobile */
+            #myAccountSettingsSection .input-group { max-width: 100%; }
+            #myAccountSettingsSection button { width: 100%; margin-bottom: 10px; }
+            #myAccountSettingsSection button.secondary { margin-top: 0; }
+            /* MODIFICATION END: Styles for My Account Section Mobile */
         }
         /* --- END OF MOBILE RESPONSIVE STYLES --- */
     </style>
@@ -179,7 +192,16 @@
                     </div>
                 </div>
                 <div id="userShiftView" class="container view-section">
-                    <div class="top-bar"><h2 id="welcomeUserName">Welcome, [User]!</h2><div><button id="accessManagerPanelBtn" class="secondary hidden">Manager Panel</button><button id="userLogoutBtn" class="secondary">Logout</button></div></div>
+                    <div class="top-bar">
+                        <h2 id="welcomeUserName">Welcome, [User]!</h2>
+                        <div>
+                            <!-- MODIFICATION START: My Account Button -->
+                            <button id="myAccountBtn" class="secondary">My Account</button>
+                            <!-- MODIFICATION END: My Account Button -->
+                            <button id="accessManagerPanelBtn" class="secondary hidden">Manager Panel</button>
+                            <button id="userLogoutBtn" class="secondary">Logout</button>
+                        </div>
+                    </div>
                     <div class="week-navigation" id="userApplicationWeekNav" style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
                         <button id="prevUserAppWeekBtn" class="small-action">« Prev App Week</button>
                         <strong id="currentUserAppWeekDisplay" style="margin: 0 10px; font-size: 1.1em;"></strong>
@@ -217,6 +239,48 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- MODIFICATION START: My Account Settings Section -->
+                <div id="myAccountSettingsSection" class="container view-section hidden">
+                    <h2>My Account Settings</h2>
+                    
+                    <div id="changeMyPasswordSection">
+                        <h3>Change My Password</h3>
+                        <div class="input-group">
+                            <label for="currentMyPasswordInput">Current Password:</label>
+                            <input type="password" id="currentMyPasswordInput">
+                        </div>
+                        <div class="input-group">
+                            <label for="newMyPasswordInput">New Password:</label>
+                            <input type="password" id="newMyPasswordInput">
+                        </div>
+                        <div class="input-group">
+                            <label for="confirmNewMyPasswordInput">Confirm New Password:</label>
+                            <input type="password" id="confirmNewMyPasswordInput">
+                        </div>
+                        <button id="submitMyPasswordChangeBtn">Change Password</button>
+                        <p id="myPasswordChangeError" class="error-message"></p>
+                        <p id="myPasswordChangeSuccess" class="success-message"></p>
+                    </div>
+
+                    <hr style="margin: 30px 0;">
+
+                    <div id="manageMyEmailSection">
+                        <h3>Manage My Email Address</h3>
+                        <p id="myEmailDisplay" class="email-display-text">Your current email: Not set</p>
+                        <div class="input-group">
+                            <label for="myEmailInput">Email Address:</label>
+                            <input type="email" id="myEmailInput" placeholder="Enter your email">
+                        </div>
+                        <button id="saveMyEmailBtn">Save Email</button>
+                        <button id="deleteMyEmailBtn" class="delete hidden">Delete Email</button>
+                        <p id="myEmailError" class="error-message"></p>
+                        <p id="myEmailSuccess" class="success-message"></p>
+                    </div>
+                     <button id="closeMyAccountSettingsBtn" class="secondary" style="margin-top: 20px; display: block; margin-left: auto; margin-right: auto; width: auto;">Close Account Settings</button>
+                </div>
+                <!-- MODIFICATION END: My Account Settings Section -->
+
             </div>
         </div>
 
@@ -393,6 +457,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODIFICATION START: Email Prompt Modal -->
+        <div id="emailPromptModal" class="hidden" style="position:fixed; top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index: 1003;">
+            <div style="background:white; padding:25px; border-radius:8px; box-shadow: 0 0 15px rgba(0,0,0,0.3); text-align:center; min-width: 320px; max-width: 90%; max-width:450px;">
+                <h3 id="emailPromptTitle" style="margin-top:0; margin-bottom:15px;">Add Your Email</h3>
+                <p id="emailPromptMessage" style="margin-bottom:10px;">Please add your email address. This can be used for important notifications in the future.</p>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label for="emailPromptInput" style="text-align:left;">Email Address:</label>
+                    <input type="email" id="emailPromptInput" placeholder="your.email@example.com" style="width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                 <p id="emailPromptError" class="error-message" style="margin-top:0; margin-bottom:10px;"></p>
+                <div style="margin-bottom: 15px; text-align: left;">
+                    <input type="checkbox" id="emailPromptDontRemindCheckbox" style="margin-right: 5px;">
+                    <label for="emailPromptDontRemindCheckbox" style="font-size: 0.9em;">Don't remind me again</label>
+                </div>
+                <button id="emailPromptSaveBtn" class="approve" style="margin-right:10px;">Save Email</button>
+                <button id="emailPromptSkipBtn" class="secondary">Skip for Now</button>
+            </div>
+        </div>
+        <!-- MODIFICATION END: Email Prompt Modal -->
         <!-- CUSTOM MODALS HTML END -->
     </div>
 
@@ -413,7 +497,7 @@
         const workDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         const standardShiftTimes = ["9:30 - 13:00", "13:00 - 16:30"];
         const SHIFT_DURATION_HOURS = 3.5;
-        const USER_APPLICATION_WEEKS_FORWARD = 4; // Number of weeks user can apply for *from the default view week*
+        const USER_APPLICATION_WEEKS_FORWARD = 4; 
 
         let currentMasterPassword = DEFAULT_MASTER_PASSWORD;
         let coworkers = [];
@@ -422,7 +506,7 @@
         let currentViewingDateMgr;
         let allShiftsData = {};
         let currentPastShiftViewDate;
-        let currentUserApplicationViewingDate; // This will be the user's currently selected week for applications
+        let currentUserApplicationViewingDate; 
         let editingShiftId = null;
         let currentShiftForModal = null;
         let editingCustomShiftId = null;
@@ -552,6 +636,35 @@
         const saveCustomShiftBtn = document.getElementById('saveCustomShiftBtn');
         const cancelCustomShiftBtn = document.getElementById('cancelCustomShiftBtn');
 
+        // MODIFICATION START: My Account and Email Prompt Elements
+        const myAccountBtn = document.getElementById('myAccountBtn');
+        const myAccountSettingsSection = document.getElementById('myAccountSettingsSection');
+        const closeMyAccountSettingsBtn = document.getElementById('closeMyAccountSettingsBtn');
+
+        const changeMyPasswordSection = document.getElementById('changeMyPasswordSection');
+        const currentMyPasswordInput = document.getElementById('currentMyPasswordInput');
+        const newMyPasswordInput = document.getElementById('newMyPasswordInput');
+        const confirmNewMyPasswordInput = document.getElementById('confirmNewMyPasswordInput');
+        const submitMyPasswordChangeBtn = document.getElementById('submitMyPasswordChangeBtn');
+        const myPasswordChangeError = document.getElementById('myPasswordChangeError');
+        const myPasswordChangeSuccess = document.getElementById('myPasswordChangeSuccess');
+        
+        const manageMyEmailSection = document.getElementById('manageMyEmailSection');
+        const myEmailDisplay = document.getElementById('myEmailDisplay');
+        const myEmailInput = document.getElementById('myEmailInput');
+        const saveMyEmailBtn = document.getElementById('saveMyEmailBtn');
+        const deleteMyEmailBtn = document.getElementById('deleteMyEmailBtn');
+        const myEmailError = document.getElementById('myEmailError');
+        const myEmailSuccess = document.getElementById('myEmailSuccess');
+
+        const emailPromptModal = document.getElementById('emailPromptModal');
+        const emailPromptInput = document.getElementById('emailPromptInput');
+        const emailPromptError = document.getElementById('emailPromptError');
+        const emailPromptDontRemindCheckbox = document.getElementById('emailPromptDontRemindCheckbox');
+        const emailPromptSaveBtn = document.getElementById('emailPromptSaveBtn');
+        const emailPromptSkipBtn = document.getElementById('emailPromptSkipBtn');
+        // MODIFICATION END: My Account and Email Prompt Elements
+
         let currentConfirmResolve = null;
         let currentPromptResolve = null;
 
@@ -578,11 +691,9 @@
             try {
                 await ensureFirebaseAnonymousAuth();
                 await loadMasterPassword();
-                currentViewingDateMgr = getNextWeekStartDate(); // Manager default view is next week
+                currentViewingDateMgr = getNextWeekStartDate(); 
                 currentPastShiftViewDate = getMondayOfDate(new Date());
-                // --- MODIFICATION: User application view defaults to NEXT week ---
                 currentUserApplicationViewingDate = getNextWeekStartDate();
-                // --- END MODIFICATION ---
                 await initializeCoworkers();
                 populateLoginUserDropdown();
                 populateCoworkerCheckboxesForCustomShift();
@@ -599,8 +710,69 @@
         async function loadMasterPassword() { try { const configRef = db.collection('config').doc('adminConfig'); let doc; try { doc = await configRef.get(); } catch (readError) { console.warn("Reading adminConfig failed (expected if rules are 'allow read: if false;'). Using default master password."); } if (doc && doc.exists && doc.data().masterAdminPassword) { currentMasterPassword = doc.data().masterAdminPassword; } else { console.warn("Admin config or master password not found or not readable. Using default and attempting to save (if rules permit)."); currentMasterPassword = DEFAULT_MASTER_PASSWORD; try { await configRef.set({ masterAdminPassword: DEFAULT_MASTER_PASSWORD }, { merge: true }); console.log("Default master password written/updated in Firestore config."); } catch (setConfigError) { console.error("Could not save default master password to Firestore (check rules for config/adminConfig create/update):", setConfigError); } } } catch (error) { console.error("Error in loadMasterPassword logic:", error); currentMasterPassword = DEFAULT_MASTER_PASSWORD; } }
         async function getWeekData(weekStartDate) { const weekKey = getWeekKey(weekStartDate); if (allShiftsData[weekKey]) { if (allShiftsData[weekKey] && Array.isArray(allShiftsData[weekKey].shifts) && typeof allShiftsData[weekKey].isPublished === 'boolean') { sortShiftsArray(allShiftsData[weekKey].shifts); return JSON.parse(JSON.stringify(allShiftsData[weekKey])); } else { delete allShiftsData[weekKey]; } } const weekDocRef = db.collection('shifts').doc(weekKey); try { const doc = await weekDocRef.get(); if (doc.exists) { let data = doc.data(); if (typeof data !== 'object' || data === null) data = {}; if (!Array.isArray(data.shifts)) { data.shifts = []; } if (typeof data.isPublished !== 'boolean') { data.isPublished = false; } data.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; if (s && !Array.isArray(s.assignedCoworkers)) s.assignedCoworkers = []; if (s && !s.description && standardShiftTimes.includes(s.time) && !isCustomTimeShift(s.time) ) { s.description = "Normal Shift"; } }); sortShiftsArray(data.shifts); allShiftsData[weekKey] = JSON.parse(JSON.stringify(data)); return data; } else { const newWeekShifts = []; let idCounter = Date.now(); for (let i = 0; i < workDays.length; i++) { const dayName = workDays[i]; const currentShiftDate = new Date(weekStartDate); currentShiftDate.setDate(weekStartDate.getDate() + i); standardShiftTimes.forEach(time => { newWeekShifts.push({ id: `${weekKey}-${idCounter++}`, day: dayName, date: currentShiftDate.toISOString(), time: time, status: "available", applicants: [], applicantName: "", description: "Normal Shift", assignedCoworkers: [] }); }); } const newWeekData = { shifts: newWeekShifts, isPublished: false }; sortShiftsArray(newWeekData.shifts); await weekDocRef.set(newWeekData); allShiftsData[weekKey] = JSON.parse(JSON.stringify(newWeekData)); return newWeekData; } } catch (error) { console.error(`Error getting week data for ${weekKey}:`, error); const fallbackData = { shifts: [], isPublished: false, error: true, errorMessage: error.message }; allShiftsData[weekKey] = JSON.parse(JSON.stringify(fallbackData)); return fallbackData; } }
         async function getShiftsForWeek(weekStartDate) { const weekData = await getWeekData(weekStartDate); return weekData; }
-        async function initializeCoworkers() { try { const snapshot = await db.collection('coworkers').get(); if (snapshot.empty) { coworkers = [ { name: "Ties", password: "1234", isManager: true }, { name: "Joep", password: "1234", isManager: false }, { name: "Jesper", password: "1234", isManager: false }, { name: "Inti", password: "1234", isManager: false }, { name: "Martijn", password: "1234", isManager: false }, { name: "Mathijs", password: "1234", isManager: false }, { name: "Dominik", password: "1234", isManager: false }, { name: "Jippe", password: "1234", isManager: false }, { name: "Zeynep", password: "1234", isManager: false } ]; const batch = db.batch(); coworkers.forEach(cw => { const docRef = db.collection('coworkers').doc(cw.name); batch.set(docRef, cw); }); await batch.commit(); } else { coworkers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); } } catch (error) { console.error("Error initializing coworkers:", error); coworkers = []; throw error; } }
-        function showCorrectView() { [initialLoginViewWrapper, userShiftViewWrapper, managerDashboardView, managerUnlockModal, changeMasterPasswordSection, myPastShiftsSection, customAlertModal, customConfirmModal, customPromptModal, assignEditModal, customShiftCreationModal, userCustomShiftsSection, userLatestCustomShiftsSection].forEach(v => { if(v) v.classList.add('hidden'); }); if (isManagerModeActive && loggedInCoworker && loggedInCoworker.isManager) { managerDashboardView.classList.remove('hidden'); managerLoggedInAs.textContent = `Logged in as: ${loggedInCoworker.name}`; refreshManagerDashboard(); } else if (loggedInCoworker) { userShiftViewWrapper.classList.remove('hidden'); prepareUserView(); } else { initialLoginViewWrapper.classList.remove('hidden'); } }
+        
+        // MODIFICATION START: Initialize Coworkers with email fields
+        async function initializeCoworkers() { 
+            try { 
+                const snapshot = await db.collection('coworkers').get(); 
+                if (snapshot.empty) { 
+                    coworkers = [ 
+                        { name: "Ties", password: "1234", isManager: true, email: "", emailReminderDisabled: false }, 
+                        { name: "Joep", password: "1234", isManager: false, email: "", emailReminderDisabled: false }, 
+                        { name: "Jesper", password: "1234", isManager: false, email: "", emailReminderDisabled: false }, 
+                        { name: "Inti", password: "1234", isManager: false, email: "", emailReminderDisabled: false }, 
+                        { name: "Martijn", password: "1234", isManager: false, email: "", emailReminderDisabled: false }, 
+                        { name: "Mathijs", password: "1234", isManager: false, email: "", emailReminderDisabled: false }, 
+                        { name: "Dominik", password: "1234", isManager: false, email: "", emailReminderDisabled: false }, 
+                        { name: "Jippe", password: "1234", isManager: false, email: "", emailReminderDisabled: false }, 
+                        { name: "Zeynep", password: "1234", isManager: false, email: "", emailReminderDisabled: false } 
+                    ]; 
+                    const batch = db.batch(); 
+                    coworkers.forEach(cw => { 
+                        const docRef = db.collection('coworkers').doc(cw.name); 
+                        batch.set(docRef, cw); 
+                    }); 
+                    await batch.commit(); 
+                } else { 
+                    coworkers = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return { 
+                            id: doc.id, 
+                            ...data,
+                            email: data.email || "", // Ensure email exists
+                            emailReminderDisabled: data.emailReminderDisabled || false // Ensure reminder flag exists
+                        };
+                    }); 
+                } 
+            } catch (error) { 
+                console.error("Error initializing coworkers:", error); 
+                coworkers = []; 
+                throw error; 
+            } 
+        }
+        // MODIFICATION END: Initialize Coworkers with email fields
+
+        function showCorrectView() { 
+            [initialLoginViewWrapper, userShiftViewWrapper, managerDashboardView, managerUnlockModal, changeMasterPasswordSection, myPastShiftsSection, customAlertModal, customConfirmModal, customPromptModal, assignEditModal, customShiftCreationModal, userCustomShiftsSection, userLatestCustomShiftsSection, 
+            // MODIFICATION START: Add new modals/sections to hide list
+            myAccountSettingsSection, emailPromptModal
+            // MODIFICATION END: Add new modals/sections to hide list
+            ].forEach(v => { if(v) v.classList.add('hidden'); }); 
+            
+            if (isManagerModeActive && loggedInCoworker && loggedInCoworker.isManager) { 
+                managerDashboardView.classList.remove('hidden'); 
+                managerLoggedInAs.textContent = `Logged in as: ${loggedInCoworker.name}`; 
+                refreshManagerDashboard(); 
+            } else if (loggedInCoworker) { 
+                userShiftViewWrapper.classList.remove('hidden'); 
+                prepareUserView(); 
+                // MODIFICATION START: Show email prompt if needed
+                checkAndShowEmailPrompt();
+                // MODIFICATION END: Show email prompt if needed
+            } else { 
+                initialLoginViewWrapper.classList.remove('hidden'); 
+            } 
+        }
         async function checkActiveSession() { const activeUserJSON = localStorage.getItem(ACTIVE_SESSION_USER_KEY); if (activeUserJSON) { const activeUser = JSON.parse(activeUserJSON); const foundCoworker = coworkers.find(c => c.name === activeUser.name); if (foundCoworker && activeUser.password === foundCoworker.password) { try { await ensureFirebaseAnonymousAuth(); loggedInCoworker = foundCoworker; } catch (error) { logout(); return; } } else { logout(); return; } } showCorrectView(); }
         function populateLoginUserDropdown() { loginUserSelect.innerHTML = '<option value="">-- Select Name --</option>'; coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(coworker => { const option = document.createElement('option'); option.value = coworker.name; option.textContent = coworker.name; loginUserSelect.appendChild(option); }); }
         
@@ -617,13 +789,18 @@
                 try {
                     await ensureFirebaseAnonymousAuth();
                     loggedInCoworker = coworker;
+                    // Ensure local loggedInCoworker object has the latest email flags
+                    const freshCoworkerData = coworkers.find(c => c.id === loggedInCoworker.id || c.name === loggedInCoworker.name);
+                    if (freshCoworkerData) {
+                        loggedInCoworker.email = freshCoworkerData.email || "";
+                        loggedInCoworker.emailReminderDisabled = freshCoworkerData.emailReminderDisabled || false;
+                    }
+
                     localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({name: coworker.name, password: coworker.password}));
                     loginPasswordInput.value = "";
                     isManagerModeActive = false;
-                    // --- MODIFICATION: Set user application view to NEXT week on login ---
                     currentUserApplicationViewingDate = getNextWeekStartDate();
-                    // --- END MODIFICATION ---
-                    showCorrectView();
+                    showCorrectView(); // Email prompt will be called within showCorrectView if needed
                 } catch (error) {
                     console.error("Firebase Anonymous Auth Error:", error);
                     initialLoginError.textContent = "Login failed. Auth session error.";
@@ -642,6 +819,11 @@
             if (!loggedInCoworker) return;
             welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
             accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
+            
+            // MODIFICATION START: Hide My Account section initially
+            myAccountSettingsSection.classList.add('hidden');
+            // MODIFICATION END: Hide My Account section initially
+
             if (myPastShiftsSection) {
                 myPastShiftsSection.classList.remove('hidden');
                 await renderMyPastShifts();
@@ -679,11 +861,9 @@
                     if(userLatestCustomShiftsSection) userLatestCustomShiftsSection.classList.add('hidden');
                 }
 
-                // --- MODIFICATION: Ensure currentUserApplicationViewingDate is set, default to NEXT week ---
                 if (!currentUserApplicationViewingDate) {
                     currentUserApplicationViewingDate = getNextWeekStartDate();
                 }
-                // --- END MODIFICATION ---
                 await renderCurrentUserApplicationWeek();
             } catch (error) {
                 console.error("Error preparing user view (outer try-catch):", error);
@@ -695,15 +875,10 @@
 
         async function renderCurrentUserApplicationWeek() {
             if (!loggedInCoworker || !currentUserApplicationViewingDate) return;
-
-            // --- MODIFICATION: Define earliest and latest allowed application dates ---
-            const earliestAllowedAppDate = getMondayOfDate(new Date()); // Current week's Monday is the absolute earliest
-            const defaultUserViewDate = getNextWeekStartDate(); // Default view for user is next week
-
-            // Calculate the last allowed application date based on the default view date + forward weeks
+            const earliestAllowedAppDate = getMondayOfDate(new Date()); 
+            const defaultUserViewDate = getNextWeekStartDate(); 
             const lastAllowedAppDate = new Date(defaultUserViewDate);
             lastAllowedAppDate.setDate(defaultUserViewDate.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7));
-            // --- END MODIFICATION ---
 
             if (currentUserAppWeekDisplay) {
                 currentUserAppWeekDisplay.textContent = `Application Week: ${formatDate(currentUserApplicationViewingDate, false)}`;
@@ -723,14 +898,10 @@
             }
 
             if (prevUserAppWeekBtn) {
-                // --- MODIFICATION: Disable prev button if viewing earliest allowed week (current week) ---
                 prevUserAppWeekBtn.disabled = getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() <= earliestAllowedAppDate.getTime();
-                // --- END MODIFICATION ---
             }
             if (nextUserAppWeekBtn) {
-                // --- MODIFICATION: Disable next button if viewing latest allowed week ---
                 nextUserAppWeekBtn.disabled = getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() >= getMondayOfDate(new Date(lastAllowedAppDate)).getTime();
-                // --- END MODIFICATION ---
             }
         }
 
@@ -979,17 +1150,12 @@
         }
 
         function renderManagerApplications(allShiftsForWeek) {
-            // This function filters shifts based on currentManagerShiftView ('standard' or 'custom')
-            // 'standard' shifts are those whose time exactly matches an entry in standardShiftTimes
-            // 'custom' shifts are all other shifts (i.e., their time is not in standardShiftTimes)
             const shiftsToDisplay = allShiftsForWeek.filter(shift => {
                 const isStandardByTime = standardShiftTimes.includes(shift.time) && !isCustomTimeShift(shift.time);
-                // isCustomTimeShift(time) is !standardShiftTimes.includes(time)
-                // So, isStandardByTime effectively checks if shift.time is one of the standardShiftTimes.
                 if (currentManagerShiftView === 'standard') {
                     return isStandardByTime;
-                } else { // currentManagerShiftView === 'custom'
-                    return !isStandardByTime; // Show shifts whose time is NOT in standardShiftTimes
+                } else { 
+                    return !isStandardByTime; 
                 }
             });
 
@@ -1153,12 +1319,11 @@
                 }
             }
             
-            // Filter shifts based on currentManagerShiftView ('standard' or 'custom') for hours calculation
             const filteredShiftsForHours = shiftsToProcessForHours.filter(s => {
                 const isStandardByTime = standardShiftTimes.includes(s.time) && !isCustomTimeShift(s.time);
                 if (currentManagerShiftView === 'standard') {
                     return isStandardByTime;
-                } else { // currentManagerShiftView === 'custom'
+                } else { 
                     return !isStandardByTime;
                 }
             });
@@ -1171,7 +1336,7 @@
                             hoursData[name] += duration;
                         }
                     });
-                } else if (s.applicantName && hoursData.hasOwnProperty(s.applicantName)) { // Legacy support
+                } else if (s.applicantName && hoursData.hasOwnProperty(s.applicantName)) { 
                      hoursData[s.applicantName] += duration;
                 }
             });
@@ -1238,17 +1403,15 @@
             }
         }
 
-        async function managerApproveSelectedApplicant(shiftId, weekKey, selectedApplicantName) { // Now unused directly, but kept for reference
+        async function managerApproveSelectedApplicant(shiftId, weekKey, selectedApplicantName) { 
             await managerApproveMultipleApplicants(shiftId, weekKey, [selectedApplicantName]);
         }
 
         async function managerDenyAllApplicants(shiftId, weekKey) { const weekDocRef = db.collection('shifts').doc(weekKey); try { await db.runTransaction(async (transaction) => { const weekDoc = await transaction.get(weekDocRef); if (!weekDoc.exists) throw "Shift data not found!"; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data."; const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId); if (shiftIndex === -1) throw "Shift not found!"; weekData.shifts[shiftIndex].status = "available"; weekData.shifts[shiftIndex].applicantName = ""; weekData.shifts[shiftIndex].applicants = []; weekData.shifts[shiftIndex].assignedCoworkers = []; transaction.update(weekDocRef, { shifts: weekData.shifts }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); }); await refreshManagerDashboard(); await prepareUserView(); } catch (error) { console.error("Error denying applicants:", error); await showAlert("Failed to deny: " + error.message); } }
         async function managerClearApprovedShift(shiftId, weekKey) { const weekDocRef = db.collection('shifts').doc(weekKey); try { await db.runTransaction(async (transaction) => { const weekDoc = await transaction.get(weekDocRef); if (!weekDoc.exists) throw "Shift data not found!"; const weekData = weekDoc.data(); if (!weekData || !Array.isArray(weekData.shifts)) throw "Invalid week data."; const shiftIndex = weekData.shifts.findIndex(s => s.id === shiftId); if (shiftIndex === -1) throw "Shift not found!"; if (weekData.shifts[shiftIndex].status !== 'approved') { await showAlert("Shift not approved."); return; } weekData.shifts[shiftIndex].status = "available"; weekData.shifts[shiftIndex].applicantName = ""; weekData.shifts[shiftIndex].applicants = []; weekData.shifts[shiftIndex].assignedCoworkers = []; transaction.update(weekDocRef, { shifts: weekData.shifts }); allShiftsData[weekKey] = JSON.parse(JSON.stringify(weekData)); }); await refreshManagerDashboard(); await prepareUserView(); } catch (error) { console.error("Error clearing shift:", error); await showAlert("Failed to clear: " + error.message); } }
         
-        async function managerManuallyAssignMultipleShift(shiftId, weekKey, coworkerNames) { // This is called by assignEditModal
+        async function managerManuallyAssignMultipleShift(shiftId, weekKey, coworkerNames) { 
             if (!Array.isArray(coworkerNames) || coworkerNames.length === 0) { 
-                // This case should be handled by assignEditSaveBtn logic, but as a fallback:
-                // If no one is selected, we treat it as clearing the shift
                 await managerClearApprovedShift(shiftId, weekKey);
                 return;
             }
@@ -1297,7 +1460,7 @@
             if(customTimeInputsDiv) customTimeInputsDiv.classList.add('hidden');
         }
         
-        function managerEditShiftAssignments(shiftToEdit) { // For TOP form - when editing DETAILS of a shift
+        function managerEditShiftAssignments(shiftToEdit) { 
             editingShiftId = shiftToEdit.id; 
             addUpdateShiftTitle.textContent = "Update Shift Details";
             managerAddShiftBtn.textContent = "Update Shift Details";
@@ -1331,14 +1494,13 @@
 
         function isCustomTimeShift(timeStr) { 
             if (!timeStr) return false; 
-            // A shift is custom if its time string is NOT one of the predefined standard shift times.
             return !standardShiftTimes.includes(timeStr); 
         }
 
         async function managerAddNewShift() { 
             if (!currentViewingDateMgr) { await showAlert("No week selected."); return; }
             const selectedDay = addShiftDaySelect.value;
-            const timeType = addShiftTimeTypeSelect.value; // This is always a standard time from the dropdown
+            const timeType = addShiftTimeTypeSelect.value; 
             let description = addShiftDescriptionInput.value.trim();
             
             let shiftTimeStr = timeType; 
@@ -1374,7 +1536,7 @@
                         
                         weekData.shifts[shiftIndex].day = selectedDay;
                         weekData.shifts[shiftIndex].date = shiftSpecificDateISO;
-                        weekData.shifts[shiftIndex].time = shiftTimeStr; // Time comes from standard dropdown
+                        weekData.shifts[shiftIndex].time = shiftTimeStr; 
                         weekData.shifts[shiftIndex].description = description || "Normal Shift";
                         
                         if (!assignCoworkersForCustomShiftDiv.classList.contains('hidden')) {
@@ -1386,7 +1548,7 @@
                             weekData.shifts[shiftIndex].applicants = [];
                         }
 
-                    } else { // Adding new standard shift from top form
+                    } else { 
                         const existingShift = weekData.shifts.find(s => s.day === selectedDay && s.time === shiftTimeStr && (s.description || "Normal Shift") === (description || "Normal Shift"));
                         if (existingShift) { throw new Error(`A shift for ${selectedDay} at ${shiftTimeStr} ${description ? 'with description "'+description+'"' : ''} already exists.`); }
                         const newShift = { id: `${weekKey}-${Date.now()}`, day: selectedDay, date: shiftSpecificDateISO, time: shiftTimeStr, status: "available", applicants: [], applicantName: "", description: description, assignedCoworkers: [] };
@@ -1427,7 +1589,43 @@
             }
         }
         function populateCoworkerCheckboxesForCustomShift() { assignCoworkersForCustomShiftDiv.innerHTML = '<h4>Assign Coworkers:</h4>'; coworkers.sort((a,b) => a.name.localeCompare(b.name)).forEach(cw => { const checkboxId = `assign-cw-${cw.id || cw.name.replace(/\s+/g, '-')}`; const label = document.createElement('label'); label.htmlFor = checkboxId; label.style.marginRight = "10px"; const checkbox = document.createElement('input'); checkbox.type = "checkbox"; checkbox.id = checkboxId; checkbox.value = cw.name; label.appendChild(checkbox); label.appendChild(document.createTextNode(` ${cw.name}`)); assignCoworkersForCustomShiftDiv.appendChild(label); }); }
-        function renderCoworkerListForManager() { coworkerListDiv.innerHTML = "<h4>Current Coworkers:</h4>"; if (coworkers.length === 0) { coworkerListDiv.innerHTML += "<p>No coworkers.</p>"; return; } const ul = document.createElement('ul'); ul.style.listStyleType = 'none'; ul.style.paddingLeft = '0'; coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => { const li = document.createElement('li'); li.classList.add('coworker-management-item'); const nameSpan = document.createElement('span'); nameSpan.textContent = `${c.name} ${c.isManager ? '(Mgr)' : ''}`; li.appendChild(nameSpan); const actionDiv = document.createElement('div'); const changePassBtn = document.createElement('button'); changePassBtn.textContent = "Pwd"; changePassBtn.classList.add("secondary", "small-action"); changePassBtn.onclick = () => handleChangeCoworkerPassword(c.id || c.name); actionDiv.appendChild(changePassBtn); const toggleMgrBtn = document.createElement('button'); toggleMgrBtn.textContent = c.isManager ? "Demote" : "Promote"; toggleMgrBtn.classList.add("secondary", "small-action"); toggleMgrBtn.onclick = () => handleToggleManagerStatus(c.id || c.name); actionDiv.appendChild(toggleMgrBtn); const deleteBtn = document.createElement('button'); deleteBtn.textContent = "Del"; deleteBtn.classList.add("delete", "small-action"); deleteBtn.onclick = () => handleDeleteCoworker(c.id || c.name); actionDiv.appendChild(deleteBtn); li.appendChild(actionDiv); ul.appendChild(li); }); coworkerListDiv.appendChild(ul); }
+        
+        // MODIFICATION START: Remove Pwd button from manager's coworker list
+        function renderCoworkerListForManager() { 
+            coworkerListDiv.innerHTML = "<h4>Current Coworkers:</h4>"; 
+            if (coworkers.length === 0) { 
+                coworkerListDiv.innerHTML += "<p>No coworkers.</p>"; 
+                return; 
+            } 
+            const ul = document.createElement('ul'); 
+            ul.style.listStyleType = 'none'; 
+            ul.style.paddingLeft = '0'; 
+            coworkers.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => { 
+                const li = document.createElement('li'); 
+                li.classList.add('coworker-management-item'); 
+                const nameSpan = document.createElement('span'); 
+                nameSpan.textContent = `${c.name} ${c.isManager ? '(Mgr)' : ''} ${c.email ? '('+c.email+')': ''}`; // Show email if present
+                li.appendChild(nameSpan); 
+                const actionDiv = document.createElement('div'); 
+                // Removed: const changePassBtn = document.createElement('button');
+                const toggleMgrBtn = document.createElement('button'); 
+                toggleMgrBtn.textContent = c.isManager ? "Demote" : "Promote"; 
+                toggleMgrBtn.classList.add("secondary", "small-action"); 
+                toggleMgrBtn.onclick = () => handleToggleManagerStatus(c.id || c.name); 
+                actionDiv.appendChild(toggleMgrBtn); 
+                const deleteBtn = document.createElement('button'); 
+                deleteBtn.textContent = "Del"; 
+                deleteBtn.classList.add("delete", "small-action"); 
+                deleteBtn.onclick = () => handleDeleteCoworker(c.id || c.name); 
+                actionDiv.appendChild(deleteBtn); 
+                li.appendChild(actionDiv); 
+                ul.appendChild(li); 
+            }); 
+            coworkerListDiv.appendChild(ul); 
+        }
+        // MODIFICATION END: Remove Pwd button from manager's coworker list
+
+        // MODIFICATION START: Add new coworker with email fields
         async function handleAddCoworker() {
             const name = newCoworkerNameInput.value.trim();
             const password = newCoworkerPasswordInput.value;
@@ -1435,8 +1633,15 @@
             if (!name || !password) { await showAlert("Name and password required."); return; }
             if (coworkers.find(c => c.name.toLowerCase() === name.toLowerCase())) { await showAlert("Coworker name already exists."); return; }
             try {
-                await db.collection('coworkers').doc(name).set({ name, password, isManager });
-                await initializeCoworkers();
+                const newCoworkerData = { 
+                    name, 
+                    password, 
+                    isManager, 
+                    email: "", // Default empty email
+                    emailReminderDisabled: false // Default reminder enabled
+                };
+                await db.collection('coworkers').doc(name).set(newCoworkerData);
+                await initializeCoworkers(); // Re-fetch all coworkers to get the new one with ID
                 populateLoginUserDropdown();
                 renderCoworkerListForManager();
                 populateCoworkerCheckboxesForCustomShift();
@@ -1449,6 +1654,8 @@
                 await showAlert("Failed to add: " + error.message);
             }
         }
+        // MODIFICATION END: Add new coworker with email fields
+        
         async function handleDeleteCoworker(coworkerDocIdOrName) {
             const coworkerToDelete = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToDelete) { await showAlert("Coworker not found."); return;}
@@ -1499,24 +1706,10 @@
                 await showAlert("Failed to delete: " + error.message);
             }
         }
-        async function handleChangeCoworkerPassword(coworkerDocIdOrName) {
-            const newPassword = await showPrompt(`Enter new password for this coworker:`);
-            if (newPassword === null) return;
-            if (!newPassword.trim()) { await showAlert("Password cannot be empty."); return; }
-            try {
-                await db.collection('coworkers').doc(coworkerDocIdOrName).update({ password: newPassword.trim() });
-                const localCoworker = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
-                if (localCoworker) localCoworker.password = newPassword.trim();
-                if (loggedInCoworker && (loggedInCoworker.id === coworkerDocIdOrName || loggedInCoworker.name === coworkerDocIdOrName)) {
-                    loggedInCoworker.password = newPassword.trim();
-                    localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({name: loggedInCoworker.name, password: loggedInCoworker.password}));
-                }
-                await showAlert(`Password updated.`);
-            } catch (error) {
-                console.error("Error changing password:", error);
-                await showAlert("Failed to change: " + error.message);
-            }
-        }
+        
+        // This function is no longer needed in the manager's context.
+        // async function handleChangeCoworkerPassword(coworkerDocIdOrName) { ... }
+
         async function handleToggleManagerStatus(coworkerDocIdOrName) {
             const coworkerToToggle = coworkers.find(c => c.id === coworkerDocIdOrName || c.name === coworkerDocIdOrName);
             if (!coworkerToToggle) return;
@@ -1561,7 +1754,6 @@
             }
         }
 
-        // --- Assign/Edit Modal Logic ---
         function openAssignEditModal(shift, weekKey, isEditingAssignments) {
             currentShiftForModal = { ...shift, weekKey: weekKey, isEditingAssignments: isEditingAssignments };
             assignEditModalTitle.textContent = isEditingAssignments ? `Edit Assignments for ${shift.day} ${shift.time}` : `Assign Coworkers to ${shift.day} ${shift.time}`;
@@ -1644,9 +1836,6 @@
                 }
             });
         }
-        // --- END Assign/Edit Modal Logic ---
-
-        // --- Custom Shift Creation Modal Logic ---
         function openCustomShiftCreationModal(shiftToEdit = null) { 
             editingCustomShiftId = null; 
             customShiftModalTitle.textContent = "Add New Custom Shift/Event";
@@ -1719,7 +1908,237 @@
                 } 
             }); 
         }
-        // --- END Custom Shift Creation Modal Logic ---
+
+        // MODIFICATION START: Email Prompt Logic
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        async function checkAndShowEmailPrompt() {
+            if (loggedInCoworker && (!loggedInCoworker.email || loggedInCoworker.email.trim() === "") && !loggedInCoworker.emailReminderDisabled) {
+                emailPromptInput.value = "";
+                emailPromptError.textContent = "";
+                emailPromptDontRemindCheckbox.checked = false;
+                emailPromptModal.classList.remove('hidden');
+                emailPromptModal.style.display = 'flex';
+            }
+        }
+
+        if (emailPromptSaveBtn) {
+            emailPromptSaveBtn.addEventListener('click', async () => {
+                const email = emailPromptInput.value.trim();
+                const dontRemind = emailPromptDontRemindCheckbox.checked;
+                emailPromptError.textContent = "";
+
+                if (!email) {
+                    emailPromptError.textContent = "Please enter an email address or skip.";
+                    return;
+                }
+                if (!isValidEmail(email)) {
+                    emailPromptError.textContent = "Please enter a valid email address.";
+                    return;
+                }
+
+                try {
+                    await db.collection('coworkers').doc(loggedInCoworker.id || loggedInCoworker.name).update({ 
+                        email: email,
+                        emailReminderDisabled: dontRemind 
+                    });
+                    loggedInCoworker.email = email;
+                    loggedInCoworker.emailReminderDisabled = dontRemind;
+                    // Update local coworkers array
+                    const localCoworker = coworkers.find(c => c.id === loggedInCoworker.id || c.name === loggedInCoworker.name);
+                    if(localCoworker) {
+                        localCoworker.email = email;
+                        localCoworker.emailReminderDisabled = dontRemind;
+                    }
+
+                    emailPromptModal.classList.add('hidden');
+                    emailPromptModal.style.display = 'none';
+                    await showAlert("Email address saved successfully!");
+                    // If My Account section is open, update its display
+                    if (!myAccountSettingsSection.classList.contains('hidden')) {
+                        populateMyAccountDetails();
+                    }
+                } catch (error) {
+                    console.error("Error saving email from prompt:", error);
+                    emailPromptError.textContent = "Failed to save email. Please try again.";
+                }
+            });
+        }
+
+        if (emailPromptSkipBtn) {
+            emailPromptSkipBtn.addEventListener('click', async () => {
+                const dontRemind = emailPromptDontRemindCheckbox.checked;
+                if (dontRemind && loggedInCoworker) {
+                    try {
+                        await db.collection('coworkers').doc(loggedInCoworker.id || loggedInCoworker.name).update({ 
+                            emailReminderDisabled: true 
+                        });
+                        loggedInCoworker.emailReminderDisabled = true;
+                         const localCoworker = coworkers.find(c => c.id === loggedInCoworker.id || c.name === loggedInCoworker.name);
+                        if(localCoworker) localCoworker.emailReminderDisabled = true;
+                    } catch (error) {
+                        console.error("Error setting 'don't remind' flag:", error);
+                        // Non-critical, proceed to hide modal
+                    }
+                }
+                emailPromptModal.classList.add('hidden');
+                emailPromptModal.style.display = 'none';
+            });
+        }
+        // MODIFICATION END: Email Prompt Logic
+
+        // MODIFICATION START: My Account Settings Logic
+        function populateMyAccountDetails() {
+            if (!loggedInCoworker) return;
+
+            // Password fields
+            currentMyPasswordInput.value = "";
+            newMyPasswordInput.value = "";
+            confirmNewMyPasswordInput.value = "";
+            myPasswordChangeError.textContent = "";
+            myPasswordChangeSuccess.textContent = "";
+
+            // Email fields
+            myEmailInput.value = loggedInCoworker.email || "";
+            myEmailDisplay.textContent = loggedInCoworker.email ? `Your current email: ${loggedInCoworker.email}` : "Your current email: Not set";
+            deleteMyEmailBtn.classList.toggle('hidden', !loggedInCoworker.email);
+            myEmailError.textContent = "";
+            myEmailSuccess.textContent = "";
+        }
+
+        if (myAccountBtn) {
+            myAccountBtn.addEventListener('click', () => {
+                populateMyAccountDetails();
+                myAccountSettingsSection.classList.remove('hidden');
+                // Hide other user view sections if necessary or scroll into view
+                [latestPublishedScheduleSection, userShiftView, userCustomShiftsSection, myPastShiftsSection].forEach(s => s.classList.add('hidden'));
+                myAccountSettingsSection.scrollIntoView({behavior: "smooth"});
+            });
+        }
+        if(closeMyAccountSettingsBtn){
+             closeMyAccountSettingsBtn.addEventListener('click', () => {
+                myAccountSettingsSection.classList.add('hidden');
+                 // Restore user view sections
+                if (loggedInCoworker) { // only if still logged in
+                    prepareUserView(); // This will re-evaluate which sections to show
+                } else {
+                    showCorrectView(); // Fallback if somehow logged out
+                }
+            });
+        }
+
+
+        if (submitMyPasswordChangeBtn) {
+            submitMyPasswordChangeBtn.addEventListener('click', async () => {
+                if (!loggedInCoworker) return;
+
+                myPasswordChangeError.textContent = "";
+                myPasswordChangeSuccess.textContent = "";
+
+                const currentPass = currentMyPasswordInput.value;
+                const newPass = newMyPasswordInput.value;
+                const confirmPass = confirmNewMyPasswordInput.value;
+
+                if (currentPass !== loggedInCoworker.password) {
+                    myPasswordChangeError.textContent = "Current password incorrect.";
+                    return;
+                }
+                if (!newPass || newPass.length < 4) { // Basic length check
+                    myPasswordChangeError.textContent = "New password must be at least 4 characters.";
+                    return;
+                }
+                if (newPass !== confirmPass) {
+                    myPasswordChangeError.textContent = "New passwords do not match.";
+                    return;
+                }
+
+                try {
+                    await db.collection('coworkers').doc(loggedInCoworker.id || loggedInCoworker.name).update({ password: newPass });
+                    
+                    loggedInCoworker.password = newPass;
+                    const localCoworker = coworkers.find(c => c.id === loggedInCoworker.id || c.name === loggedInCoworker.name);
+                    if(localCoworker) localCoworker.password = newPass;
+
+                    // Update localStorage session
+                    localStorage.setItem(ACTIVE_SESSION_USER_KEY, JSON.stringify({ name: loggedInCoworker.name, password: newPass }));
+                    
+                    myPasswordChangeSuccess.textContent = "Password changed successfully!";
+                    currentMyPasswordInput.value = "";
+                    newMyPasswordInput.value = "";
+                    confirmNewMyPasswordInput.value = "";
+                    setTimeout(() => { myPasswordChangeSuccess.textContent = ""; }, 3000);
+
+                } catch (error) {
+                    console.error("Error changing own password:", error);
+                    myPasswordChangeError.textContent = "Failed to change password. Please try again.";
+                }
+            });
+        }
+
+        if (saveMyEmailBtn) {
+            saveMyEmailBtn.addEventListener('click', async () => {
+                if (!loggedInCoworker) return;
+                myEmailError.textContent = "";
+                myEmailSuccess.textContent = "";
+                const newEmail = myEmailInput.value.trim();
+
+                if (!newEmail) {
+                    myEmailError.textContent = "Email address cannot be empty. To remove, use Delete Email.";
+                    return;
+                }
+                if (!isValidEmail(newEmail)) {
+                    myEmailError.textContent = "Please enter a valid email address.";
+                    return;
+                }
+
+                try {
+                    await db.collection('coworkers').doc(loggedInCoworker.id || loggedInCoworker.name).update({ email: newEmail });
+                    loggedInCoworker.email = newEmail;
+                    const localCoworker = coworkers.find(c => c.id === loggedInCoworker.id || c.name === loggedInCoworker.name);
+                    if(localCoworker) localCoworker.email = newEmail;
+                    
+                    myEmailDisplay.textContent = `Your current email: ${newEmail}`;
+                    deleteMyEmailBtn.classList.remove('hidden');
+                    myEmailSuccess.textContent = "Email address updated!";
+                    setTimeout(() => { myEmailSuccess.textContent = ""; }, 3000);
+                } catch (error) {
+                    console.error("Error saving email:", error);
+                    myEmailError.textContent = "Failed to save email. Please try again.";
+                }
+            });
+        }
+
+        if (deleteMyEmailBtn) {
+            deleteMyEmailBtn.addEventListener('click', async () => {
+                if (!loggedInCoworker) return;
+                
+                const confirmDelete = await showConfirm("Are you sure you want to delete your email address?");
+                if (!confirmDelete) return;
+
+                myEmailError.textContent = "";
+                myEmailSuccess.textContent = "";
+                try {
+                    await db.collection('coworkers').doc(loggedInCoworker.id || loggedInCoworker.name).update({ email: "" });
+                    loggedInCoworker.email = "";
+                    const localCoworker = coworkers.find(c => c.id === loggedInCoworker.id || c.name === loggedInCoworker.name);
+                    if(localCoworker) localCoworker.email = "";
+
+                    myEmailInput.value = "";
+                    myEmailDisplay.textContent = "Your current email: Not set";
+                    deleteMyEmailBtn.classList.add('hidden');
+                    myEmailSuccess.textContent = "Email address deleted!";
+                    setTimeout(() => { myEmailSuccess.textContent = ""; }, 3000);
+                } catch (error) {
+                    console.error("Error deleting email:", error);
+                    myEmailError.textContent = "Failed to delete email. Please try again.";
+                }
+            });
+        }
+
+        // MODIFICATION END: My Account Settings Logic
 
 
         coworkerLoginBtn.addEventListener('click', handleCoworkerLogin);
@@ -1771,22 +2190,18 @@
 
         if (prevUserAppWeekBtn) {
             prevUserAppWeekBtn.addEventListener('click', async () => {
-                // --- MODIFICATION: Allow going back to current week from default next week view ---
-                const earliestAllowedAppDate = getMondayOfDate(new Date()); // Current week is the limit
+                const earliestAllowedAppDate = getMondayOfDate(new Date()); 
                 if (currentUserApplicationViewingDate && getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() > earliestAllowedAppDate.getTime()) {
                     currentUserApplicationViewingDate.setDate(currentUserApplicationViewingDate.getDate() - 7);
                     await renderCurrentUserApplicationWeek();
                 }
-                // --- END MODIFICATION ---
             });
         }
         if (nextUserAppWeekBtn) {
             nextUserAppWeekBtn.addEventListener('click', async () => {
-                // --- MODIFICATION: Boundary for next week based on default view (next week) + forward limit ---
-                const defaultUserViewDateForBoundary = getNextWeekStartDate(); // Base for calculating forward limit
+                const defaultUserViewDateForBoundary = getNextWeekStartDate(); 
                 const lastAllowedAppDateBoundary = new Date(defaultUserViewDateForBoundary);
                 lastAllowedAppDateBoundary.setDate(defaultUserViewDateForBoundary.getDate() + (USER_APPLICATION_WEEKS_FORWARD * 7));
-                // --- END MODIFICATION ---
 
                 if (currentUserApplicationViewingDate && getMondayOfDate(new Date(currentUserApplicationViewingDate)).getTime() < getMondayOfDate(new Date(lastAllowedAppDateBoundary)).getTime()) {
                     currentUserApplicationViewingDate.setDate(currentUserApplicationViewingDate.getDate() + 7);
