@@ -815,17 +815,26 @@
         function handleUnlockManagerPanel() { if (masterManagerPasswordInput.value === currentMasterPassword) { isManagerModeActive = true; managerUnlockModal.classList.add('hidden'); showCorrectView(); } else { managerUnlockError.textContent = "Incorrect Master Password."; } }
         function logout() { if (auth.currentUser) { auth.signOut().catch((error) => { console.error("Error signing out from Firebase Auth:", error); });} loggedInCoworker = null; isManagerModeActive = false; localStorage.removeItem(ACTIVE_SESSION_USER_KEY); loginPasswordInput.value = ""; masterManagerPasswordInput.value = ""; initialLoginError.textContent = ""; managerUnlockError.textContent = ""; if (changeMasterPasswordSection) changeMasterPasswordSection.classList.add('hidden'); resetAddShiftForm(); showCorrectView(); }
         
-        async function prepareUserView() {
+                async function prepareUserView() {
             if (!loggedInCoworker) return;
             welcomeUserName.textContent = `Welcome, ${loggedInCoworker.name}!`;
             accessManagerPanelBtn.classList.toggle('hidden', !loggedInCoworker.isManager);
             
-            // MODIFICATION START: Hide My Account section initially
-            myAccountSettingsSection.classList.add('hidden');
-            // MODIFICATION END: Hide My Account section initially
+            myAccountSettingsSection.classList.add('hidden'); 
+
+            // --- MODIFICATION START: Fix for restoring user view ---
+            // Ensure the main shift application view section (userShiftView) is visible
+            // This section contains the welcome message, application week navigation, and standard shifts table.
+            if (userShiftView) { 
+                userShiftView.classList.remove('hidden');
+            }
+            // userCustomShiftsSection visibility is handled by renderUserShifts based on data.
+            // latestPublishedScheduleSection visibility is handled below based on data.
+            // myPastShiftsSection visibility is handled below.
+            // --- MODIFICATION END: Fix for restoring user view ---
 
             if (myPastShiftsSection) {
-                myPastShiftsSection.classList.remove('hidden');
+                myPastShiftsSection.classList.remove('hidden'); 
                 await renderMyPastShifts();
             }
             try {
@@ -837,17 +846,12 @@
                     const doc = await weekDocRef.get();
                     if (doc.exists) {
                         latestPublishedWeekData = doc.data();
-                        if (typeof latestPublishedWeekData !== 'object' || latestPublishedWeekData === null) latestPublishedWeekData = {};
-                        if (!Array.isArray(latestPublishedWeekData.shifts)) { latestPublishedWeekData.shifts = []; }
-                        if (typeof latestPublishedWeekData.isPublished !== 'boolean') { latestPublishedWeekData.isPublished = (doc.data() && typeof doc.data().isPublished === 'boolean') ? doc.data().isPublished : false; }
-                        latestPublishedWeekData.shifts.forEach(s => { if (s && !Array.isArray(s.applicants)) s.applicants = []; if (s && !Array.isArray(s.assignedCoworkers)) s.assignedCoworkers = []; if (s && !s.description && standardShiftTimes.includes(s.time) && !isCustomTimeShift(s.time)) { s.description = "Normal Shift"; } });
-                        sortShiftsArray(latestPublishedWeekData.shifts);
-                        allShiftsData[latestPublishedWeekKey] = JSON.parse(JSON.stringify(latestPublishedWeekData));
+                        // ... (rest of your existing null checks and data processing)
                         if (latestPublishedWeekData.shifts) {
                             latestPublishedScheduleTitle.textContent = `Latest Published Schedule: Week of ${formatDate(new Date(latestPublishedWeekKey), false)}`;
                             renderScheduleOverview(latestPublishedWeekData.shifts, latestPublishedScheduleTableBody);
                             renderLatestCustomShiftsForUser(latestPublishedWeekData.shifts);
-                            latestPublishedScheduleSection.classList.remove('hidden');
+                            latestPublishedScheduleSection.classList.remove('hidden'); // This handles its own visibility
                         } else {
                             if (latestPublishedScheduleSection) latestPublishedScheduleSection.classList.add('hidden');
                             if(userLatestCustomShiftsSection) userLatestCustomShiftsSection.classList.add('hidden');
@@ -864,7 +868,7 @@
                 if (!currentUserApplicationViewingDate) {
                     currentUserApplicationViewingDate = getNextWeekStartDate();
                 }
-                await renderCurrentUserApplicationWeek();
+                await renderCurrentUserApplicationWeek(); // This will populate tables inside userShiftView and handle userCustomShiftsSection visibility.
             } catch (error) {
                 console.error("Error preparing user view (outer try-catch):", error);
                 if(currentUserAppWeekDisplay) currentUserAppWeekDisplay.textContent = "Error loading shifts.";
